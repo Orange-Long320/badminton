@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理后台 - 宿舍羽毛球排行榜</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        .admin-section {
+            background: var(--color-surface);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+            box-shadow: var(--shadow-md);
+        }
+        .admin-section h2 {
+            margin-top: 0;
+            color: var(--color-text-primary);
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 14px;
+            transition: all var(--transition-fast);
+        }
+        .btn-primary {
+            background: var(--color-dark);
+            color: white;
+        }
+        .btn-primary:hover {
+            background: var(--color-dark-surface);
+        }
+        .btn-danger {
+            background: var(--color-danger);
+            color: white;
+        }
+        .btn-danger:hover {
+            opacity: 0.9;
+        }
+        .btn-secondary {
+            background: var(--color-surface-alt);
+            color: var(--color-text-primary);
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--color-text-primary);
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 12px;
+            align-items: end;
+        }
+        .form-row .form-group {
+            margin-bottom: 0;
+        }
+        input[type="text"],
+        input[type="number"],
+        input[type="password"],
+        input[type="date"],
+        select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid var(--color-surface-alt);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            transition: border-color var(--transition-fast);
+            box-sizing: border-box;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--color-dark);
+        }
+        .vs-divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--color-text-secondary);
+            padding-bottom: 10px;
+        }
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: var(--spacing-md);
+            border: 2px solid var(--color-surface-alt);
+            border-radius: var(--radius-sm);
+            font-family: monospace;
+            font-size: 13px;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: var(--color-dark);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+        }
+        .stat-card {
+            background: var(--color-surface-alt);
+            padding: var(--spacing-md);
+            border-radius: var(--radius-sm);
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--color-dark);
+        }
+        .stat-label {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+        }
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--color-success);
+            color: white;
+            padding: 12px 24px;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-lg);
+            animation: slideIn 0.3s ease-out;
+            z-index: 1000;
+        }
+        .toast.error {
+            background: var(--color-danger);
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* 密码保护覆盖层 */
+        .auth-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--color-bg);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .auth-box {
+            background: var(--color-surface);
+            padding: 40px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            max-width: 400px;
+            width: 100%;
+        }
+        .auth-box h2 {
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        .auth-box p {
+            text-align: center;
+            color: var(--color-text-secondary);
+            margin-bottom: 24px;
+        }
+        .match-list-preview {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .match-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid var(--color-surface-alt);
+        }
+        .match-item:last-child {
+            border-bottom: none;
+        }
+        .match-teams {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .match-score {
+            font-weight: bold;
+            color: var(--color-dark);
+            min-width: 60px;
+            text-align: center;
+        }
+        .btn-delete {
+            background: none;
+            border: none;
+            color: var(--color-text-muted);
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+        }
+        .btn-delete:hover {
+            color: var(--color-danger);
+        }
+        .btn-delete svg {
+            width: 18px;
+            height: 18px;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .admin-nav {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .admin-nav button {
+            padding: 8px 16px;
+            background: var(--color-surface);
+            border: 2px solid var(--color-surface-alt);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-weight: 500;
+            transition: all var(--transition-fast);
+        }
+        .admin-nav button.active {
+            background: var(--color-dark);
+            color: white;
+            border-color: var(--color-dark);
+        }
+    </style>
+</head>
+<body>
+    <!-- 密码验证覆盖层 -->
+    <div class="auth-overlay" id="auth-overlay">
+        <div class="auth-box">
+            <h2>🔐 管理员登录</h2>
+            <p>请输入管理密码以访问后台</p>
+            <form id="auth-form">
+                <div class="form-group">
+                    <input type="password" id="admin-password" placeholder="请输入密码" required autofocus>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%">
+                    登录
+                </button>
+            </form>
+            <p style="margin-top: 16px; font-size: 13px;">
+                <a href="index.html" style="color: var(--color-text-secondary);">← 返回首页</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <main class="main-content hidden" id="main-content">
+        <nav class="sidebar">
+            <div class="nav-brand">
+                <div class="logo">BYC</div>
+                <span class="logo-text">Badminton</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item" title="返回首页" onclick="location.href='index.html'">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                        <polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="admin-container">
+            <h1 style="margin-bottom: 24px;">🏸 管理后台</h1>
+
+            <!-- 导航 -->
+            <div class="admin-nav">
+                <button class="active" data-tab="record">📝 录入比赛</button>
+                <button data-tab="manage">📊 数据管理</button>
+                <button data-tab="matches">📅 比赛列表</button>
+            </div>
+
+            <!-- 录入比赛 -->
+            <div class="admin-section" id="tab-record">
+                <h2>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                        <path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="12" y1="18" x2="12" y2="12"/>
+                        <line x1="9" y1="15" x2="15" y2="15"/>
+                    </svg>
+                    录入比赛
+                </h2>
+
+                <form id="match-form" style="margin-top: 20px;">
+                    <div class="form-group">
+                        <label for="match-date">比赛日期</label>
+                        <input type="date" id="match-date" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>比赛类型</label>
+                        <div style="display: flex; gap: 12px;">
+                            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                <input type="radio" name="match-type" value="singles" checked onchange="toggleMatchType()"> 单打
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                <input type="radio" name="match-type" value="doubles" onchange="toggleMatchType()"> 双打
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="team1-player1">选手 1</label>
+                            <select id="team1-player1" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="team1-score" style="text-align: center;">得分</label>
+                            <input type="number" id="team1-score" placeholder="0" min="0" style="width: 80px;" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="team2-player1">对手 1</label>
+                            <select id="team2-player1" required></select>
+                        </div>
+                    </div>
+
+                    <div class="form-row" style="margin-top: 12px;">
+                        <div class="form-group"></div>
+                        <div class="form-group">
+                            <label for="team2-score" style="text-align: center;">得分</label>
+                            <input type="number" id="team2-score" placeholder="0" min="0" style="width: 80px;" required>
+                        </div>
+                        <div class="form-group"></div>
+                    </div>
+
+                    <div id="doubles-fields" class="hidden">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="team1-player2">选手 2 (队友)</label>
+                                <select id="team1-player2"></select>
+                            </div>
+                            <div class="form-group"></div>
+                            <div class="form-group">
+                                <label for="team2-player2">对手 2 (队友)</label>
+                                <select id="team2-player2"></select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 20px;">
+                        <button type="submit" class="btn btn-primary">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                                <line x1="12" y1="5" x2="12" y2="19"/>
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                            </svg>
+                            提交记录
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 数据管理 -->
+            <div class="admin-section hidden" id="tab-manage">
+                <h2>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    数据管理
+                </h2>
+
+                <div class="stats-grid" style="margin-top: 20px;">
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-players">0</div>
+                        <div class="stat-label">选手数量</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-doubles">0</div>
+                        <div class="stat-label">双打组合</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-matches">0</div>
+                        <div class="stat-label">比赛记录</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-storage">0 KB</div>
+                        <div class="stat-label">存储空间</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>导出数据</label>
+                    <textarea id="export-data" readonly placeholder="点击"导出全部数据"按钮生成数据..."></textarea>
+                </div>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button class="btn btn-primary" onclick="exportData()">导出全部数据</button>
+                    <button class="btn btn-secondary" onclick="copyExport()">复制</button>
+                    <button class="btn btn-secondary" onclick="downloadExport()">下载</button>
+                </div>
+
+                <div class="form-group" style="margin-top: 20px;">
+                    <label>导入数据</label>
+                    <textarea id="import-data" placeholder="在此粘贴 JSON 格式的数据..."></textarea>
+                </div>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button class="btn btn-primary" onclick="importData()">导入数据</button>
+                    <button class="btn btn-secondary" onclick="document.getElementById('import-data').value = ''">清空</button>
+                </div>
+
+                <div class="form-group" style="margin-top: 20px;">
+                    <label style="color: var(--color-danger);">⚠️ 危险操作</label>
+                    <button class="btn btn-danger" onclick="resetData()">清除所有数据</button>
+                </div>
+            </div>
+
+            <!-- 比赛列表 -->
+            <div class="admin-section hidden" id="tab-matches">
+                <h2>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                    比赛列表
+                </h2>
+                <div class="match-list-preview" id="match-list" style="margin-top: 20px;">
+                    <!-- 比赛列表由 JS 渲染 -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+    <script>
+        // 密码配置（请修改为你的密码）
+        const ADMIN_PASSWORD = 'admin123';
+
+        // 检查登录状态
+        function checkAuth() {
+            const isAuth = sessionStorage.getItem('admin_authenticated');
+            if (isAuth === 'true') {
+                document.getElementById('auth-overlay').classList.add('hidden');
+                document.getElementById('main-content').classList.remove('hidden');
+                initAdmin();
+            }
+        }
+
+        // 密码验证
+        document.getElementById('auth-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const password = document.getElementById('admin-password').value;
+            if (password === ADMIN_PASSWORD) {
+                sessionStorage.setItem('admin_authenticated', 'true');
+                document.getElementById('auth-overlay').classList.add('hidden');
+                document.getElementById('main-content').classList.remove('hidden');
+                initAdmin();
+                showToast('登录成功');
+            } else {
+                showToast('密码错误', 'error');
+            }
+        });
+
+        // 切换比赛类型
+        function toggleMatchType() {
+            const type = document.querySelector('input[name="match-type"]:checked').value;
+            const doublesFields = document.getElementById('doubles-fields');
+            if (type === 'doubles') {
+                doublesFields.classList.remove('hidden');
+            } else {
+                doublesFields.classList.add('hidden');
+            }
+        }
+
+        // 初始化管理后台
+        function initAdmin() {
+            loadLocalData();
+            loadStats();
+            populatePlayerSelects();
+            renderMatchList();
+
+            // 设置默认日期为今天
+            document.getElementById('match-date').value = new Date().toISOString().split('T')[0];
+        }
+
+        // 填充选手选择框
+        function populatePlayerSelects() {
+            const selects = ['team1-player1', 'team1-player2', 'team2-player1', 'team2-player2'];
+            const options = players.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+            selects.forEach(id => {
+                const select = document.getElementById(id);
+                if (select) select.innerHTML = options;
+            });
+        }
+
+        // 录入比赛表单提交
+        document.getElementById('match-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const matchType = document.querySelector('input[name="match-type"]:checked').value;
+            const matchDate = document.getElementById('match-date').value;
+            const team1Score = parseInt(document.getElementById('team1-score').value);
+            const team2Score = parseInt(document.getElementById('team2-score').value);
+
+            const team1Player1Id = document.getElementById('team1-player1').value;
+            const team2Player1Id = document.getElementById('team2-player1').value;
+
+            const getPlayerName = (id) => players.find(p => p.id == id)?.name || '';
+
+            let team1, team2;
+
+            if (matchType === 'singles') {
+                team1 = getPlayerName(team1Player1Id);
+                team2 = getPlayerName(team2Player1Id);
+
+                const player1 = players.find(p => p.id == team1Player1Id);
+                const player2 = players.find(p => p.id == team2Player1Id);
+
+                if (player1 && player2) {
+                    const netWins = team1Score - team2Score;
+                    player1.points += netWins;
+                    player2.points -= netWins;
+                    player1.wins += team1Score;
+                    player1.losses += team2Score;
+                    player2.wins += team2Score;
+                    player2.losses += team1Score;
+                }
+            } else {
+                const team1Player2Id = document.getElementById('team1-player2').value;
+                const team2Player2Id = document.getElementById('team2-player2').value;
+
+                team1 = `${getPlayerName(team1Player1Id)}/${getPlayerName(team1Player2Id)}`;
+                team2 = `${getPlayerName(team2Player1Id)}/${getPlayerName(team2Player2Id)}`;
+
+                const team1Players = [team1Player1Id, team1Player2Id].sort().join(',');
+                const team2Players = [team2Player1Id, team2Player2Id].sort().join(',');
+
+                let doublesTeam1 = doublesTeams.find(t => t.players.sort().join(',') === team1Players);
+                let doublesTeam2 = doublesTeams.find(t => t.players.sort().join(',') === team2Players);
+
+                if (!doublesTeam1) {
+                    doublesTeam1 = {
+                        id: doublesTeams.length + 1,
+                        name: team1,
+                        players: [parseInt(team1Player1Id), parseInt(team1Player2Id)],
+                        points: 0,
+                        wins: 0,
+                        losses: 0
+                    };
+                    doublesTeams.push(doublesTeam1);
+                }
+                if (!doublesTeam2) {
+                    doublesTeam2 = {
+                        id: doublesTeams.length + 1,
+                        name: team2,
+                        players: [parseInt(team2Player1Id), parseInt(team2Player2Id)],
+                        points: 0,
+                        wins: 0,
+                        losses: 0
+                    };
+                    doublesTeams.push(doublesTeam2);
+                }
+
+                const netWins = team1Score - team2Score;
+                doublesTeam1.points += netWins;
+                doublesTeam2.points -= netWins;
+                doublesTeam1.wins += team1Score;
+                doublesTeam1.losses += team2Score;
+                doublesTeam2.wins += team2Score;
+                doublesTeam2.losses += team1Score;
+            }
+
+            const newMatch = {
+                id: matchHistory.length + 1,
+                type: matchType,
+                team1: team1,
+                team2: team2,
+                score: `${team1Score}:${team2Score}`,
+                winner: team1Score > team2Score ? 'team1' : (team1Score < team2Score ? 'team2' : 'draw'),
+                date: matchDate
+            };
+
+            matchHistory.unshift(newMatch);
+            saveLocalData();
+
+            showToast('比赛记录已保存！');
+            renderMatchList();
+            loadStats();
+
+            // 重置表单
+            e.target.reset();
+            document.getElementById('match-date').value = new Date().toISOString().split('T')[0];
+            toggleMatchType();
+        });
+
+        // 渲染比赛列表
+        function renderMatchList() {
+            const container = document.getElementById('match-list');
+            if (!container || matchHistory.length === 0) {
+                container.innerHTML = '<p style="color: var(--color-text-secondary); text-align: center; padding: 40px;">暂无比赛记录</p>';
+                return;
+            }
+
+            container.innerHTML = matchHistory.map(match => `
+                <div class="match-item">
+                    <div class="match-teams">
+                        <span>${match.team1}</span>
+                        <span class="match-score">${match.score}</span>
+                        <span>${match.team2}</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="color: var(--color-text-secondary); font-size: 13px;">${match.date}</span>
+                        <button class="btn-delete" onclick="deleteMatch(${match.id})">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="3 6 5 6 21 6"/>
+                                <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 删除比赛
+        function deleteMatch(matchId) {
+            if (!confirm('确定要删除这场比赛记录吗？')) return;
+
+            const matchIndex = matchHistory.findIndex(m => m.id === matchId);
+            if (matchIndex === -1) return;
+
+            const match = matchHistory[matchIndex];
+            const scores = match.score.split(':');
+            const team1Score = parseInt(scores[0]);
+            const team2Score = parseInt(scores[1]);
+
+            if (match.type === 'singles') {
+                const player1 = players.find(p => p.name === match.team1);
+                const player2 = players.find(p => p.name === match.team2);
+                if (player1 && player2) {
+                    const netWins = team1Score - team2Score;
+                    player1.points -= netWins;
+                    player2.points += netWins;
+                    player1.wins -= team1Score;
+                    player1.losses -= team2Score;
+                    player2.wins -= team2Score;
+                    player2.losses -= team1Score;
+                }
+            } else {
+                const team1Players = match.team1.split('/').sort();
+                const team2Players = match.team2.split('/').sort();
+
+                const doublesTeam1 = doublesTeams.find(t => {
+                    const names = t.players.map(id => players.find(p => p.id === id)?.name).sort();
+                    return names[0] === team1Players[0] && names[1] === team1Players[1];
+                });
+                const doublesTeam2 = doublesTeams.find(t => {
+                    const names = t.players.map(id => players.find(p => p.id === id)?.name).sort();
+                    return names[0] === team2Players[0] && names[1] === team2Players[1];
+                });
+
+                if (doublesTeam1 && doublesTeam2) {
+                    const netWins = team1Score - team2Score;
+                    doublesTeam1.points -= netWins;
+                    doublesTeam2.points += netWins;
+                    doublesTeam1.wins -= team1Score;
+                    doublesTeam1.losses -= team2Score;
+                    doublesTeam2.wins -= team2Score;
+                    doublesTeam2.losses -= team1Score;
+                }
+            }
+
+            matchHistory.splice(matchIndex, 1);
+            saveLocalData();
+            renderMatchList();
+            loadStats();
+            showToast('比赛已删除');
+        }
+
+        // 加载统计
+        function loadStats() {
+            document.getElementById('stat-players').textContent = players.length;
+            document.getElementById('stat-doubles').textContent = doublesTeams.length;
+            document.getElementById('stat-matches').textContent = matchHistory.length;
+
+            let totalSize = 0;
+            for (let key in localStorage) {
+                if (key.startsWith('badminton_')) {
+                    totalSize += localStorage[key].length * 2;
+                }
+            }
+            document.getElementById('stat-storage').textContent = formatSize(totalSize);
+        }
+
+        function formatSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / 1024 / 1024).toFixed(1) + ' MB';
+        }
+
+        // 导出数据
+        function exportData() {
+            const data = {
+                players: JSON.stringify(players),
+                doubles: JSON.stringify(doublesTeams),
+                matches: JSON.stringify(matchHistory),
+                nextPlayerId: localStorage.getItem('badminton_nextPlayerId') || '5'
+            };
+            document.getElementById('export-data').value = JSON.stringify(data, null, 2);
+            showToast('数据导出成功');
+        }
+
+        function copyExport() {
+            const textarea = document.getElementById('export-data');
+            if (!textarea.value) {
+                showToast('请先生成导出数据', 'error');
+                return;
+            }
+            navigator.clipboard.writeText(textarea.value).then(() => {
+                showToast('已复制到剪贴板');
+            });
+        }
+
+        function downloadExport() {
+            const textarea = document.getElementById('export-data');
+            if (!textarea.value) {
+                showToast('请先生成导出数据', 'error');
+                return;
+            }
+            const blob = new Blob([textarea.value], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'badminton_backup_' + new Date().toISOString().split('T')[0] + '.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('下载已开始');
+        }
+
+        function importData() {
+            const textarea = document.getElementById('import-data');
+            if (!textarea.value.trim()) {
+                showToast('请输入要导入的数据', 'error');
+                return;
+            }
+            try {
+                const data = JSON.parse(textarea.value);
+                if (!data.players || !data.doubles || !data.matches) {
+                    showToast('数据格式不正确', 'error');
+                    return;
+                }
+                localStorage.setItem('badminton_players', data.players);
+                localStorage.setItem('badminton_doubles', data.doubles);
+                localStorage.setItem('badminton_matches', data.matches);
+                if (data.nextPlayerId) {
+                    localStorage.setItem('badminton_nextPlayerId', data.nextPlayerId);
+                }
+                showToast('导入成功，即将刷新页面...');
+                setTimeout(() => location.reload(), 1500);
+            } catch (e) {
+                showToast('JSON 格式错误：' + e.message, 'error');
+            }
+        }
+
+        function resetData() {
+            if (confirm('⚠️ 确定要清除所有数据吗？\n\n此操作无法撤销！')) {
+                localStorage.clear();
+                showToast('数据已清除，即将刷新页面...');
+                setTimeout(() => location.reload(), 1500);
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = 'toast' + (type === 'error' ? ' error' : '');
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // 标签页切换
+        document.querySelectorAll('.admin-nav button').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.admin-nav button').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+
+                const tab = this.dataset.tab;
+                document.querySelectorAll('.admin-section').forEach(section => {
+                    section.classList.add('hidden');
+                });
+                document.getElementById('tab-' + tab).classList.remove('hidden');
+            });
+        });
+
+        // 页面加载时检查认证
+        checkAuth();
+    </script>
+</body>
+</html>

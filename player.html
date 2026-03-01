@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>选手个人主页 - 宿舍羽毛球排行榜</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- 左侧导航栏 -->
+    <nav class="sidebar">
+        <div class="nav-brand">
+            <div class="logo">BYC</div>
+            <span class="logo-text">Badminton</span>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item" title="返回主页" onclick="window.location.href='index.html'">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M6 9H2v10c0 1.1.9 2 2 2h16a2 2 0 002-2V9h-4"/>
+                    <polyline points="4 2 4 7 9 7 9 2"/>
+                    <rect x="14" y="2" width="8" height="5"/>
+                </svg>
+            </li>
+            <li class="nav-item active" title="选手资料">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+            </li>
+        </ul>
+        <div class="nav-bottom">
+            <div class="nav-user">
+                <div class="user-avatar" id="nav-user-avatar">龙</div>
+                <span class="user-name" id="nav-user-name">龙鑫昊</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区 -->
+    <main class="main-content">
+        <header class="page-header">
+            <div>
+                <h1>选手个人主页</h1>
+                <p class="subtitle" id="player-subtitle">宿舍联赛 · 2026 赛季</p>
+            </div>
+        </header>
+
+        <!-- 基础信息区 -->
+        <section class="card player-profile-header">
+            <div class="profile-header-content">
+                <div class="profile-avatar-large" id="profile-avatar">
+                    龙
+                </div>
+                <div class="profile-info">
+                    <div class="profile-name-row">
+                        <h2 class="profile-name" id="profile-name">龙鑫昊</h2>
+                        <div class="profile-type-tags" id="profile-type-tags">
+                            <span class="type-tag singles">单打</span>
+                            <span class="type-tag doubles">双打</span>
+                        </div>
+                    </div>
+                    <p class="profile-signature" id="profile-signature">"宿舍林丹，杀球必出界"</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 核心数据看板 -->
+        <section class="dashboard-grid player-stats-section">
+            <div class="card player-stats-overview">
+                <div class="card-header">
+                    <h2>
+                        <svg class="nav-icon" style="width:18px;height:18px;vertical-align:middle;margin-right:8px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="8" r="7"/>
+                            <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>
+                        </svg>
+                        核心数据
+                    </h2>
+                </div>
+                <div class="card-content">
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <div class="stat-label">总战绩</div>
+                            <div class="stat-value" id="stat-total-record">0 胜 0 负</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">胜率</div>
+                            <div class="stat-value" id="stat-win-rate">0%</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">积分</div>
+                            <div class="stat-value" id="stat-points">0</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">排名</div>
+                            <div class="stat-value" id="stat-rank">#1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 近期状态 -->
+            <div class="card player-recent-form">
+                <div class="card-header">
+                    <h2>近期状态</h2>
+                    <span class="badge">最近 5 场</span>
+                </div>
+                <div class="card-content">
+                    <div class="form-display" id="recent-form">
+                        <span class="form-empty">暂无比赛记录</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 细分数据 -->
+        <section class="dashboard-grid player-detailed-stats">
+            <div class="card player-type-stats">
+                <div class="card-header">
+                    <h2>细分数据</h2>
+                </div>
+                <div class="card-content">
+                    <div class="type-stats-grid">
+                        <div class="type-stat-box">
+                            <div class="type-stat-label">单打胜率</div>
+                            <div class="type-stat-value" id="stat-singles-rate">0%</div>
+                            <div class="type-stat-detail" id="stat-singles-record">0 胜 0 负</div>
+                        </div>
+                        <div class="type-stat-box">
+                            <div class="type-stat-label">双打胜率</div>
+                            <div class="type-stat-value" id="stat-doubles-rate">0%</div>
+                            <div class="type-stat-detail" id="stat-doubles-record">0 胜 0 负</div>
+                        </div>
+                        <div class="type-stat-box full-width">
+                            <div class="type-stat-label">最长连胜</div>
+                            <div class="type-stat-value" id="stat-best-streak">0 场</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 社交关系 -->
+            <div class="card player-relations">
+                <div class="card-header">
+                    <h2>社交关系</h2>
+                </div>
+                <div class="card-content">
+                    <div class="relations-grid">
+                        <div class="relation-box">
+                            <div class="relation-label">最佳搭档</div>
+                            <div class="relation-content" id="best-partner">
+                                <div class="relation-empty">暂无数据</div>
+                            </div>
+                        </div>
+                        <div class="relation-box">
+                            <div class="relation-label">一生之敌</div>
+                            <div class="relation-content" id="arch-rival">
+                                <div class="relation-empty">暂无数据</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 比赛记录 -->
+        <section class="card player-match-history">
+            <div class="card-header">
+                <h2>
+                    <svg class="nav-icon" style="width:18px;height:18px;vertical-align:middle;margin-right:8px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                    比赛记录
+                </h2>
+                <span class="badge" id="match-count">0 场</span>
+            </div>
+            <div class="card-content">
+                <div class="match-history-list" id="match-history-list">
+                    <div class="match-history-empty">暂无比赛记录</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+    <script>
+        // 页面加载时初始化个人页面
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof renderPlayerProfile === 'function') {
+                renderPlayerProfile();
+            }
+        });
+    </script>
+</body>
+</html>

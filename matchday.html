@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>比赛日详情 - 宿舍羽毛球排行榜</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- 左侧导航栏 -->
+    <nav class="sidebar">
+        <div class="nav-brand">
+            <div class="logo">BYC</div>
+            <span class="logo-text">Badminton</span>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item" title="返回主页" onclick="window.location.href='index.html'">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M6 9H2v10c0 1.1.9 2 2 2h16a2 2 0 002-2V9h-4"/>
+                    <polyline points="4 2 4 7 9 7 9 2"/>
+                    <rect x="14" y="2" width="8" height="5"/>
+                </svg>
+            </li>
+            <li class="nav-item active" title="比赛日历">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+            </li>
+        </ul>
+        <div class="nav-bottom">
+            <div class="nav-user">
+                <div class="user-avatar" id="nav-user-avatar">龙</div>
+                <span class="user-name" id="nav-user-name">龙鑫昊</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区 -->
+    <main class="main-content">
+        <header class="page-header">
+            <div>
+                <h1>比赛日详情</h1>
+                <p class="subtitle" id="matchday-subtitle">宿舍联赛 · 2026 赛季</p>
+            </div>
+        </header>
+
+        <!-- 日期标题卡片 -->
+        <section class="card matchday-header-card">
+            <div class="matchday-header-content">
+                <div class="matchday-date-info">
+                    <h2 class="matchday-date" id="matchday-date">2026 年 3 月 1 日</h2>
+                    <span class="matchday-weekday" id="matchday-weekday">星期日</span>
+                </div>
+                <div class="matchday-stats-summary">
+                    <div class="summary-stat">
+                        <span class="summary-value" id="total-matches">0</span>
+                        <span class="summary-label">比赛场数</span>
+                    </div>
+                    <div class="summary-stat">
+                        <span class="summary-value" id="total-players">0</span>
+                        <span class="summary-label">参赛人数</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 趣味统计 -->
+        <section class="dashboard-grid matchday-fun-stats">
+            <!-- 当日之星 -->
+            <div class="card star-player-card">
+                <div class="card-header">
+                    <h2>
+                        <svg class="nav-icon" style="width:18px;height:18px;vertical-align:middle;margin-right:8px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                        </svg>
+                        当日之星
+                    </h2>
+                </div>
+                <div class="card-content">
+                    <div class="star-player-content" id="star-player">
+                        <div class="star-empty">暂无数据</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 最佳组合 -->
+            <div class="card best-team-card">
+                <div class="card-header">
+                    <h2>
+                        <svg class="nav-icon" style="width:18px;height:18px;vertical-align:middle;margin-right:8px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 00-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 010 7.75"/>
+                        </svg>
+                        最佳双打组合
+                    </h2>
+                </div>
+                <div class="card-content">
+                    <div class="best-team-content" id="best-team">
+                        <div class="team-empty">暂无数据</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 比赛记录 -->
+        <section class="card matchday-matches-card">
+            <div class="card-header">
+                <h2>
+                    <svg class="nav-icon" style="width:18px;height:18px;vertical-align:middle;margin-right:8px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                    比赛记录
+                </h2>
+                <span class="badge" id="matches-count">0 场</span>
+            </div>
+            <div class="card-content">
+                <div class="matchday-match-list" id="matchday-match-list">
+                    <div class="matchday-match-empty">暂无比赛记录</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof renderMatchdayPage === 'function') {
+                renderMatchdayPage();
+            }
+        });
+    </script>
+</body>
+</html>

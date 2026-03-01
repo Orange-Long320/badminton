@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - 宿舍羽毛球排行榜</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="login.css">
+</head>
+<body class="login-page">
+    <!-- 登录容器 -->
+    <div class="login-container">
+        <!-- 左侧装饰区 -->
+        <div class="login-sidebar">
+            <div class="login-branding">
+                <div class="brand-logo">
+                    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="50" cy="50" r="45" fill="rgba(255,255,255,0.1)" stroke="currentColor" stroke-width="2"/>
+                        <ellipse cx="50" cy="55" rx="30" ry="10" fill="currentColor" opacity="0.3"/>
+                        <path d="M20 55 Q50 20 80 55" stroke="currentColor" stroke-width="3" fill="none"/>
+                        <circle cx="50" cy="35" r="8" fill="currentColor" opacity="0.6"/>
+                    </svg>
+                </div>
+                <h1 class="brand-title">宿舍羽毛球排行榜</h1>
+                <p class="brand-subtitle">Badminton Ranking System</p>
+                <div class="brand-features">
+                    <div class="feature-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                            <polyline points="22 4 12 14.01 9 11.01"/>
+                        </svg>
+                        <span>实时排行榜</span>
+                    </div>
+                    <div class="feature-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                        </svg>
+                        <span>比赛记录</span>
+                    </div>
+                    <div class="feature-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                        <span>选手管理</span>
+                    </div>
+                    <div class="feature-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                            <line x1="16" y1="2" x2="16" y2="6"/>
+                            <line x1="8" y1="2" x2="8" y2="6"/>
+                            <line x1="3" y1="10" x2="21" y2="10"/>
+                        </svg>
+                        <span>比赛日历</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧登录表单 -->
+        <div class="login-main">
+            <div class="login-box">
+                <!-- 登录表单 -->
+                <div class="login-form-container" id="login-form-container">
+                    <h2 class="login-title">欢迎回来</h2>
+                    <p class="login-subtitle">登录后继续你的羽毛球之旅</p>
+
+                    <form id="login-form" class="login-form">
+                        <div class="form-group">
+                            <label for="login-username">用户名</label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                                    <circle cx="12" cy="7" r="4"/>
+                                </svg>
+                                <input type="text" id="login-username" placeholder="请输入用户名" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="login-password">密码</label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                    <path d="M7 11V7a5 5 0 0110 0v4"/>
+                                </svg>
+                                <input type="password" id="login-password" placeholder="请输入密码" required>
+                                <button type="button" class="password-toggle" id="login-password-toggle" title="显示密码">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                        <circle cx="12" cy="12" r="3"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-options">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="remember-me">
+                                <span>记住我</span>
+                            </label>
+                            <a href="#" class="forgot-link">忘记密码？</a>
+                        </div>
+
+                        <button type="submit" class="btn-login">
+                            <span>登录</span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                                <polyline points="12 5 19 12 12 19"/>
+                            </svg>
+                        </button>
+                    </form>
+
+                    <div class="login-divider">
+                        <span>还没有账号？</span>
+                    </div>
+
+                    <button class="btn-link-register" id="btn-link-register">
+                        立即注册
+                    </button>
+                </div>
+
+                <!-- 注册表单 -->
+                <div class="register-form-container" id="register-form-container" style="display: none;">
+                    <h2 class="login-title">创建账号</h2>
+                    <p class="login-subtitle">加入我们，开始你的羽毛球之旅</p>
+
+                    <form id="register-form" class="login-form">
+                        <div class="form-group">
+                            <label for="reg-username">用户名</label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                                    <circle cx="12" cy="7" r="4"/>
+                                </svg>
+                                <input type="text" id="reg-username" placeholder="4-20 位字母或数字" required minlength="4" maxlength="20">
+                            </div>
+                            <span class="input-hint">4-20 位字母或数字</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-nickname">昵称</label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                                    <circle cx="12" cy="7" r="4"/>
+                                </svg>
+                                <input type="text" id="reg-nickname" placeholder="请输入昵称" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-email">邮箱（可选）</label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                                    <polyline points="22,6 12,13 2,6"/>
+                                </svg>
+                                <input type="email" id="reg-email" placeholder="请输入邮箱">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-password">密码</label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                    <path d="M7 11V7a5 5 0 0110 0v4"/>
+                                </svg>
+                                <input type="password" id="reg-password" placeholder="至少 6 位" required minlength="6">
+                                <button type="button" class="password-toggle" id="reg-password-toggle" title="显示密码">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                        <circle cx="12" cy="12" r="3"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <span class="input-hint">至少 6 位字符</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-confirm">确认密码</label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                    <path d="M7 11V7a5 5 0 0110 0v4"/>
+                                </svg>
+                                <input type="password" id="reg-confirm" placeholder="再次输入密码" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-login btn-register">
+                            <span>创建账号</span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19"/>
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                            </svg>
+                        </button>
+                    </form>
+
+                    <div class="login-divider">
+                        <span>已有账号？</span>
+                    </div>
+
+                    <button class="btn-link-login" id="btn-link-login">
+                        返回登录
+                    </button>
+                </div>
+
+                <!-- 加载状态 -->
+                <div class="login-loading" id="login-loading" style="display: none;">
+                    <div class="loading-spinner"></div>
+                    <p class="loading-text">登录中...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 提示消息 -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="api-client.js"></script>
+    <script src="login.js"></script>
+</body>
+</html>
