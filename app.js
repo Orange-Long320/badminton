@@ -1509,47 +1509,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         document.getElementById('prev-player').addEventListener('click', () => switchPlayer(-1));
         document.getElementById('next-player').addEventListener('click', () => switchPlayer(1));
 
-        // 批量删除相关事件
-        document.getElementById('btn-batch-delete').addEventListener('click', enterBatchMode);
-        document.getElementById('btn-select-all').addEventListener('click', selectAllMatches);
-        document.getElementById('btn-confirm-batch-delete').addEventListener('click', batchDeleteMatches);
-        document.getElementById('btn-cancel-batch').addEventListener('click', exitBatchMode);
-
-        // 按钮事件
-        document.getElementById('btn-new-singles').addEventListener('click', () => openModal('singles'));
-        document.getElementById('btn-new-doubles').addEventListener('click', () => openModal('doubles'));
-        document.querySelector('.nav-item.add-btn').addEventListener('click', () => openModal('singles'));
-
-        // 弹窗事件
-        document.getElementById('modal-close').addEventListener('click', closeModal);
-        document.getElementById('btn-cancel').addEventListener('click', closeModal);
-        document.getElementById('btn-submit').addEventListener('click', submitMatch);
-        document.getElementById('modal-overlay').addEventListener('click', (e) => {
-            if (e.target.id === 'modal-overlay') {
-                closeModal();
-            }
-        });
-
-        // 比赛类型切换
-        document.getElementById('match-type').addEventListener('change', (e) => {
-            const doublesFields = document.querySelectorAll('.doubles-field');
-            const title = document.getElementById('modal-title');
-            if (e.target.value === 'doubles') {
-                doublesFields.forEach(field => field.style.display = 'block');
-                title.textContent = '新建双打比赛';
-            } else {
-                doublesFields.forEach(field => field.style.display = 'none');
-                title.textContent = '新建单打比赛';
-            }
-        });
-
-        // 键盘事件
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                closeModal();
-            }
-        });
-
         // 日历初始化和事件绑定
         renderCalendar();
 
