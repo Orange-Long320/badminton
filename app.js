@@ -1480,9 +1480,9 @@ function renderFunStats(matches, dateStr) {
 // 初始化
 // ================================
 
-document.addEventListener('DOMContentLoaded', function() {
-    // 加载本地数据
-    loadLocalData();
+document.addEventListener('DOMContentLoaded', async function() {
+    // 加载本地数据（等待完成）
+    await loadLocalData();
 
     // 检查是否在个人页面
     const isProfilePage = document.getElementById('profile-avatar') !== null;
