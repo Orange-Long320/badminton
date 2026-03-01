@@ -2,3 +2,6 @@
 backend/
 node_modules/
 *.log
+
+# 但允许 data.json（用于数据同步）
+!data.json

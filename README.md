@@ -1,6 +1,6 @@
 # 宿舍羽毛球排行榜
 
-> 纯前端版本，数据存储在本地浏览器，无需后端即可使用。
+> 纯前端版本，支持通过 GitHub 同步数据，无需后端服务器。
 
 ## 功能特点
 
@@ -62,6 +62,36 @@ git push origin gh-pages
 const ADMIN_PASSWORD = 'admin123'; // 改为你的密码
 ```
 
+## 数据同步（让其他人看到数据）
+
+### 方式 1：通过 data.json 同步（推荐）
+
+1. 在 `admin.html` 录入数据
+2. 点击"生成 data.json"按钮
+3. 将下载的 `data.json` 放到项目根目录
+4. 提交到 GitHub：
+   ```bash
+   git add data.json
+   git commit -m "update: 同步比赛数据"
+   git push origin gh-pages
+   ```
+5. 其他人访问时会自动加载最新数据
+
+### 方式 2：浏览器控制台导出
+
+```javascript
+// 导出数据
+const data = {
+    players: JSON.parse(localStorage.getItem('badminton_players')),
+    doubles: JSON.parse(localStorage.getItem('badminton_doubles')),
+    matches: JSON.parse(localStorage.getItem('badminton_matches')),
+    nextPlayerId: localStorage.getItem('badminton_nextPlayerId')
+};
+console.log(JSON.stringify(data, null, 2));
+
+// 复制输出到 data.json，然后提交到 GitHub
+```
+
 ## 数据管理
 
 ### 查看和管理数据
@@ -98,10 +128,12 @@ location.reload();
 ```
 羽毛球测试/
 ├── index.html          # 主页（排行榜）
+├── admin.html          # 管理后台（需密码）
 ├── player.html         # 选手详情页
 ├── matchday.html       # 比赛日历详情页
 ├── style.css           # 样式文件
-├── app.js              # 主要逻辑
+├── app.js              # 主要逻辑（含数据加载）
+├── data.json           # 数据文件（提交到 GitHub）
 ├── GITHUB_PAGES.md     # GitHub 部署指南
 └── README.md           # 本文件
 ```

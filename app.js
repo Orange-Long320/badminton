@@ -32,27 +32,51 @@ let selectedCalendarDate = null;
 // localStorage 数据持久化
 // ================================
 
-// 加载本地数据
-function loadLocalData() {
+// 加载本地数据（优先从远程 data.json 加载）
+async function loadLocalData() {
+    // 尝试从 data.json 加载数据
+    try {
+        const response = await fetch('data.json?t=' + Date.now());
+        if (response.ok) {
+            const remoteData = await response.json();
+
+            // 检查 localStorage 是否有更新的数据
+            const localMatches = JSON.parse(localStorage.getItem('badminton_matches') || '[]');
+
+            // 如果本地比赛记录比远程多，使用本地数据
+            if (localMatches.length > (remoteData.matches || []).length) {
+                // 使用本地数据
+                const savedPlayers = localStorage.getItem('badminton_players');
+                const savedDoubles = localStorage.getItem('badminton_doubles');
+                const savedNextId = localStorage.getItem('badminton_nextPlayerId');
+
+                if (savedPlayers) players = JSON.parse(savedPlayers);
+                if (savedDoubles) doublesTeams = JSON.parse(savedDoubles);
+                if (savedNextId) window.nextPlayerId = parseInt(savedNextId);
+                matchHistory = localMatches;
+            } else {
+                // 使用远程数据
+                if (remoteData.players) players = remoteData.players;
+                if (remoteData.doublesTeams) doublesTeams = remoteData.doublesTeams;
+                if (remoteData.matches) matchHistory = remoteData.matches;
+                if (remoteData.nextPlayerId) window.nextPlayerId = remoteData.nextPlayerId;
+            }
+            return;
+        }
+    } catch (e) {
+        console.log('无法加载 data.json，使用本地数据');
+    }
+
+    // 如果 data.json 加载失败，使用 localStorage
     const savedPlayers = localStorage.getItem('badminton_players');
     const savedDoubles = localStorage.getItem('badminton_doubles');
     const savedMatches = localStorage.getItem('badminton_matches');
     const savedNextId = localStorage.getItem('badminton_nextPlayerId');
 
-    if (savedPlayers) {
-        players = JSON.parse(savedPlayers);
-    }
-    if (savedDoubles) {
-        doublesTeams = JSON.parse(savedDoubles);
-    }
-    if (savedMatches) {
-        matchHistory = JSON.parse(savedMatches);
-    }
-    if (savedNextId) {
-        window.nextPlayerId = parseInt(savedNextId);
-    } else {
-        window.nextPlayerId = 5; // 从 5 开始
-    }
+    if (savedPlayers) players = JSON.parse(savedPlayers);
+    if (savedDoubles) doublesTeams = JSON.parse(savedDoubles);
+    if (savedMatches) matchHistory = JSON.parse(savedMatches);
+    if (savedNextId) window.nextPlayerId = parseInt(savedNextId);
 }
 
 // 保存数据到本地

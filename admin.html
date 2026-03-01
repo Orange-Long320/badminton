@@ -427,6 +427,14 @@
                     <label style="color: var(--color-danger);">⚠️ 危险操作</label>
                     <button class="btn btn-danger" onclick="resetData()">清除所有数据</button>
                 </div>
+
+                <div class="form-group" style="margin-top: 20px;">
+                    <label style="color: var(--color-success);">📤 同步到 GitHub</label>
+                    <p style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: 12px;">
+                        生成 data.json 文件后，手动提交到 GitHub 仓库，其他人就能看到最新数据了。
+                    </p>
+                    <button class="btn btn-primary" onclick="generateDataJson()">生成 data.json</button>
+                </div>
             </div>
 
             <!-- 比赛列表 -->
@@ -783,6 +791,36 @@
                 showToast('数据已清除，即将刷新页面...');
                 setTimeout(() => location.reload(), 1500);
             }
+        }
+
+        function generateDataJson() {
+            // 确保数据已保存
+            saveLocalData();
+
+            const data = {
+                players: players,
+                doublesTeams: doublesTeams,
+                matches: matchHistory,
+                nextPlayerId: window.nextPlayerId || 5
+            };
+
+            const jsonStr = JSON.stringify(data, null, 2);
+
+            // 下载文件
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'data.json';
+            a.click();
+            URL.revokeObjectURL(url);
+
+            showToast('data.json 已生成，请提交到 GitHub 仓库');
+
+            // 显示说明
+            setTimeout(() => {
+                alert('生成成功！\n\n下一步操作：\n1. 将 data.json 文件放到项目根目录\n2. 执行 git add data.json\n3. 执行 git commit -m "update: 同步比赛数据"\n4. 执行 git push origin gh-pages');
+            }, 500);
         }
 
         function showToast(message, type = 'success') {
