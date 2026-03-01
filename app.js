@@ -29,62 +29,34 @@ let currentCalendarDate = new Date();
 let selectedCalendarDate = null;
 
 // ================================
-// localStorage 数据持久化
+// 数据加载（从 data.json 加载）
 // ================================
 
-// 加载本地数据（优先从远程 data.json 加载）
+// 加载数据
 async function loadLocalData() {
-    // 尝试从 data.json 加载数据
     try {
+        // 添加时间戳防止缓存
         const response = await fetch('data.json?t=' + Date.now());
         if (response.ok) {
-            const remoteData = await response.json();
-
-            // 检查 localStorage 是否有更新的数据
-            const localMatches = JSON.parse(localStorage.getItem('badminton_matches') || '[]');
-
-            // 如果本地比赛记录比远程多，使用本地数据
-            if (localMatches.length > (remoteData.matches || []).length) {
-                // 使用本地数据
-                const savedPlayers = localStorage.getItem('badminton_players');
-                const savedDoubles = localStorage.getItem('badminton_doubles');
-                const savedNextId = localStorage.getItem('badminton_nextPlayerId');
-
-                if (savedPlayers) players = JSON.parse(savedPlayers);
-                if (savedDoubles) doublesTeams = JSON.parse(savedDoubles);
-                if (savedNextId) window.nextPlayerId = parseInt(savedNextId);
-                matchHistory = localMatches;
-            } else {
-                // 使用远程数据
-                if (remoteData.players) players = remoteData.players;
-                if (remoteData.doublesTeams) doublesTeams = remoteData.doublesTeams;
-                if (remoteData.matches) matchHistory = remoteData.matches;
-                if (remoteData.nextPlayerId) window.nextPlayerId = remoteData.nextPlayerId;
-            }
-            return;
+            const data = await response.json();
+            if (data.players) players = data.players;
+            if (data.doublesTeams) doublesTeams = data.doublesTeams;
+            if (data.matches) matchHistory = data.matches;
+            if (data.nextPlayerId) window.nextPlayerId = data.nextPlayerId;
+            console.log('数据加载成功:', players.length, '名选手', matchHistory.length, '场比赛');
         }
     } catch (e) {
-        console.log('无法加载 data.json，使用本地数据');
+        console.error('加载 data.json 失败:', e);
+        alert('无法加载数据文件，请检查网络连接或联系管理员');
     }
-
-    // 如果 data.json 加载失败，使用 localStorage
-    const savedPlayers = localStorage.getItem('badminton_players');
-    const savedDoubles = localStorage.getItem('badminton_doubles');
-    const savedMatches = localStorage.getItem('badminton_matches');
-    const savedNextId = localStorage.getItem('badminton_nextPlayerId');
-
-    if (savedPlayers) players = JSON.parse(savedPlayers);
-    if (savedDoubles) doublesTeams = JSON.parse(savedDoubles);
-    if (savedMatches) matchHistory = JSON.parse(savedMatches);
-    if (savedNextId) window.nextPlayerId = parseInt(savedNextId);
 }
 
-// 保存数据到本地
+// 保存数据到本地（仅保存到 localStorage，供管理员导出）
 function saveLocalData() {
     localStorage.setItem('badminton_players', JSON.stringify(players));
     localStorage.setItem('badminton_doubles', JSON.stringify(doublesTeams));
     localStorage.setItem('badminton_matches', JSON.stringify(matchHistory));
-    localStorage.setItem('badminton_nextPlayerId', window.nextPlayerId.toString());
+    localStorage.setItem('badminton_nextPlayerId', (window.nextPlayerId || 5).toString());
 }
 
 // 重置数据

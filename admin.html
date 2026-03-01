@@ -498,7 +498,17 @@
 
         // 初始化管理后台
         function initAdmin() {
-            loadLocalData();
+            // 管理后台从 localStorage 加载数据
+            const savedPlayers = localStorage.getItem('badminton_players');
+            const savedDoubles = localStorage.getItem('badminton_doubles');
+            const savedMatches = localStorage.getItem('badminton_matches');
+            const savedNextId = localStorage.getItem('badminton_nextPlayerId');
+
+            if (savedPlayers) players = JSON.parse(savedPlayers);
+            if (savedDoubles) doublesTeams = JSON.parse(savedDoubles);
+            if (savedMatches) matchHistory = JSON.parse(savedMatches);
+            if (savedNextId) window.nextPlayerId = parseInt(savedNextId);
+
             loadStats();
             populatePlayerSelects();
             renderMatchList();
