@@ -1593,7 +1593,8 @@ function renderFunStats(matches, dateStr) {
 // 初始化
 // ================================
 
-document.addEventListener('DOMContentLoaded', async function() {
+// 页面初始化函数（可在 DOMContentLoaded 和 pageshow 中调用）
+async function initializePage() {
     // 加载本地数据（等待完成）
     await loadLocalData();
 
@@ -1627,5 +1628,17 @@ document.addEventListener('DOMContentLoaded', async function() {
 
         document.getElementById('prev-month').addEventListener('click', () => switchCalendarMonth(-1));
         document.getElementById('next-month').addEventListener('click', () => switchCalendarMonth(1));
+    }
+}
+
+document.addEventListener('DOMContentLoaded', async function() {
+    await initializePage();
+});
+
+// 处理浏览器前进/后退缓存（bfcache）
+window.addEventListener('pageshow', async function(event) {
+    // 如果页面是从 bfcache 恢复的，重新初始化
+    if (event.persisted) {
+        await initializePage();
     }
 });
