@@ -102,9 +102,12 @@ async function loadFromGithub() {
         }
 
         console.log('已从 GitHub 同步最新数据');
+        console.log('同步后双打组合数量:', doublesTeams.length);
+        console.log('同步后比赛记录数量:', matchHistory.length);
 
         // 同步数据后重新计算统计数据
         recalculateDoublesStats();
+        console.log('重新计算后双打组合数据:', doublesTeams);
     } catch (e) {
         console.warn('从 GitHub 加载失败:', e.message);
     }
