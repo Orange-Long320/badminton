@@ -1333,19 +1333,25 @@ function renderFunStats(matches, dateStr) {
             const team1 = match.team1;
             const team2 = match.team2;
 
-            if (!playerStats[team1]) playerStats[team1] = { wins: 0, losses: 0, points: 0 };
-            if (!playerStats[team2]) playerStats[team2] = { wins: 0, losses: 0, points: 0 };
+            if (!playerStats[team1]) playerStats[team1] = { wins: 0, losses: 0, draws: 0, points: 0 };
+            if (!playerStats[team2]) playerStats[team2] = { wins: 0, losses: 0, draws: 0, points: 0 };
 
-            if (isTeam1Win) {
+            if (match.winner === 'team1') {
                 playerStats[team1].wins++;
                 playerStats[team1].points += team1Score;
                 playerStats[team2].losses++;
                 playerStats[team2].points += team2Score;
-            } else {
+            } else if (match.winner === 'team2') {
                 playerStats[team2].wins++;
                 playerStats[team2].points += team2Score;
                 playerStats[team1].losses++;
                 playerStats[team1].points += team1Score;
+            } else if (match.winner === 'draw') {
+                // 平局
+                playerStats[team1].draws++;
+                playerStats[team1].points += team1Score;
+                playerStats[team2].draws++;
+                playerStats[team2].points += team2Score;
             }
         } else {
             // 双打
@@ -1353,10 +1359,10 @@ function renderFunStats(matches, dateStr) {
             const team2Players = match.team2.split('/');
 
             [...team1Players, ...team2Players].forEach(player => {
-                if (!playerStats[player]) playerStats[player] = { wins: 0, losses: 0, points: 0 };
+                if (!playerStats[player]) playerStats[player] = { wins: 0, losses: 0, draws: 0, points: 0 };
             });
 
-            if (isTeam1Win) {
+            if (match.winner === 'team1') {
                 team1Players.forEach(p => {
                     playerStats[p].wins++;
                     playerStats[p].points += team1Score;
@@ -1365,7 +1371,7 @@ function renderFunStats(matches, dateStr) {
                     playerStats[p].losses++;
                     playerStats[p].points += team2Score;
                 });
-            } else {
+            } else if (match.winner === 'team2') {
                 team2Players.forEach(p => {
                     playerStats[p].wins++;
                     playerStats[p].points += team2Score;
@@ -1373,6 +1379,16 @@ function renderFunStats(matches, dateStr) {
                 team1Players.forEach(p => {
                     playerStats[p].losses++;
                     playerStats[p].points += team1Score;
+                });
+            } else if (match.winner === 'draw') {
+                // 平局
+                team1Players.forEach(p => {
+                    playerStats[p].draws++;
+                    playerStats[p].points += team1Score;
+                });
+                team2Players.forEach(p => {
+                    playerStats[p].draws++;
+                    playerStats[p].points += team2Score;
                 });
             }
         }
@@ -1383,10 +1399,10 @@ function renderFunStats(matches, dateStr) {
     let bestScore = -1;
 
     for (const [name, stats] of Object.entries(playerStats)) {
-        const totalGames = stats.wins + stats.losses;
+        const totalGames = stats.wins + stats.losses + stats.draws;
         const winRate = totalGames > 0 ? (stats.wins / totalGames) : 0;
-        // 分数 = 胜场数 * 10 + 胜率 * 5 + 得分
-        const score = stats.wins * 10 + winRate * 5 + stats.points;
+        // 分数 = 胜场数 * 10 + 平局数 * 5 + 胜率 * 5 + 得分
+        const score = stats.wins * 10 + stats.draws * 5 + winRate * 5 + stats.points;
 
         if (score > bestScore) {
             bestScore = score;
@@ -1396,6 +1412,7 @@ function renderFunStats(matches, dateStr) {
                 avatar: player ? player.avatar : name.charAt(0),
                 wins: stats.wins,
                 losses: stats.losses,
+                draws: stats.draws,
                 points: stats.points
             };
         }
@@ -1404,15 +1421,17 @@ function renderFunStats(matches, dateStr) {
     // 渲染当日之星
     const starContainer = document.getElementById('star-player');
     if (starPlayer) {
-        const totalGames = starPlayer.wins + starPlayer.losses;
+        const totalGames = starPlayer.wins + starPlayer.losses + starPlayer.draws;
         const winRate = totalGames > 0 ? ((starPlayer.wins / totalGames) * 100).toFixed(0) : 0;
+        const drawText = starPlayer.draws > 0 ? `/${starPlayer.draws}平` : '';
+
         starContainer.innerHTML = `
             <div class="star-player">
                 <div class="player-avatar-medium">${starPlayer.avatar}</div>
                 <div class="player-name-medium">${starPlayer.name}</div>
                 <div class="player-stats-detail">
                     <div class="stat-detail-item">
-                        <span class="stat-detail-value">${starPlayer.wins}胜${starPlayer.losses}负</span>
+                        <span class="stat-detail-value">${starPlayer.wins}胜${starPlayer.losses}负${drawText}</span>
                         <span class="stat-detail-label">战绩</span>
                     </div>
                     <div class="stat-detail-item">
@@ -1439,15 +1458,19 @@ function renderFunStats(matches, dateStr) {
         const team1Name = team1Players.join('/');
         const team2Name = team2Players.join('/');
 
-        if (!teamStats[team1Name]) teamStats[team1Name] = { wins: 0, losses: 0, players: team1Players };
-        if (!teamStats[team2Name]) teamStats[team2Name] = { wins: 0, losses: 0, players: team2Players };
+        if (!teamStats[team1Name]) teamStats[team1Name] = { wins: 0, losses: 0, draws: 0, players: team1Players };
+        if (!teamStats[team2Name]) teamStats[team2Name] = { wins: 0, losses: 0, draws: 0, players: team2Players };
 
         if (match.winner === 'team1') {
             teamStats[team1Name].wins++;
             teamStats[team2Name].losses++;
-        } else {
+        } else if (match.winner === 'team2') {
             teamStats[team2Name].wins++;
             teamStats[team1Name].losses++;
+        } else if (match.winner === 'draw') {
+            // 平局，两队都计为平局
+            teamStats[team1Name].draws++;
+            teamStats[team2Name].draws++;
         }
     });
 
@@ -1456,9 +1479,10 @@ function renderFunStats(matches, dateStr) {
     let bestTeamScore = -1;
 
     for (const [teamName, stats] of Object.entries(teamStats)) {
-        const totalGames = stats.wins + stats.losses;
+        const totalGames = stats.wins + stats.losses + stats.draws;
         const winRate = totalGames > 0 ? (stats.wins / totalGames) : 0;
-        const score = stats.wins * 10 + winRate * 5;
+        // 分数 = 胜场数 * 10 + 平局数 * 5 + 胜率 * 5
+        const score = stats.wins * 10 + stats.draws * 5 + winRate * 5;
 
         if (score > bestTeamScore) {
             bestTeamScore = score;
@@ -1466,7 +1490,8 @@ function renderFunStats(matches, dateStr) {
                 name: teamName,
                 players: stats.players,
                 wins: stats.wins,
-                losses: stats.losses
+                losses: stats.losses,
+                draws: stats.draws
             };
         }
     }
@@ -1479,8 +1504,9 @@ function renderFunStats(matches, dateStr) {
             return player ? player.avatar : playerName.charAt(0);
         });
 
-        const totalGames = bestTeam.wins + bestTeam.losses;
+        const totalGames = bestTeam.wins + bestTeam.losses + bestTeam.draws;
         const winRate = totalGames > 0 ? ((bestTeam.wins / totalGames) * 100).toFixed(0) : 0;
+        const drawText = bestTeam.draws > 0 ? `/${bestTeam.draws}平` : '';
 
         teamContainer.innerHTML = `
             <div class="best-team">
@@ -1489,7 +1515,7 @@ function renderFunStats(matches, dateStr) {
                 </div>
                 <div class="team-info">
                     <div class="team-name">${bestTeam.name}</div>
-                    <div class="team-record">${bestTeam.wins}胜${bestTeam.losses}负 胜率${winRate}%</div>
+                    <div class="team-record">${bestTeam.wins}胜${bestTeam.losses}负${drawText} 胜率${winRate}%</div>
                 </div>
             </div>
         `;
