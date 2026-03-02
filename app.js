@@ -1285,7 +1285,6 @@ function renderPlayerProfile() {
     } else {
         rivalContainer.innerHTML = '<div class="relation-empty">暂无数据</div>';
     }
-    }
 
     // 渲染比赛记录
     renderMatchHistoryList(stats.matches);
