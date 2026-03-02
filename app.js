@@ -47,11 +47,8 @@ async function loadLocalData() {
 
     console.log('从 localStorage 加载数据:', players.length, '名选手');
 
-    // 尝试从 GitHub 加载最新数据（仅当有配置时）
-    const githubToken = localStorage.getItem('github_token');
-    if (githubToken) {
-        await loadFromGithub();
-    }
+    // 尝试从 GitHub 加载最新数据（无需 token）
+    await loadFromGithub();
 
     // 初始化缺失的 draws 字段（兼容性处理）
     players.forEach(p => {
@@ -64,7 +61,7 @@ async function loadLocalData() {
     console.log('数据加载完成');
 }
 
-// 从 GitHub 加载最新数据（仅用于有 Token 的配置用户）
+// 从 GitHub 加载最新数据
 async function loadFromGithub() {
     try {
         const owner = localStorage.getItem('github_owner') || 'Orange-Long320';
@@ -79,12 +76,19 @@ async function loadFromGithub() {
         const response = await fetch(`https://raw.githubusercontent.com/${owner}/${repo}/${branch}/data.json?t=${timestamp}`);
 
         if (!response.ok) {
+            console.log('从 GitHub 加载失败：HTTP', response.status);
             return;
         }
 
         const data = await response.json();
+        console.log('从 GitHub 加载的原始数据:', {
+            players: data.players?.length,
+            doublesTeams: (data.doublesTeams || data.doubles)?.length,
+            matches: data.matches?.length
+        });
 
-        if (data.players) {
+        // 只有在 GitHub 数据存在时才更新
+        if (data.players && data.players.length > 0) {
             players = data.players;
             localStorage.setItem('badminton_players', JSON.stringify(players));
         }
@@ -92,7 +96,7 @@ async function loadFromGithub() {
             doublesTeams = data.doublesTeams || data.doubles;
             localStorage.setItem('badminton_doubles', JSON.stringify(doublesTeams));
         }
-        if (data.matches) {
+        if (data.matches && data.matches.length > 0) {
             matchHistory = data.matches;
             localStorage.setItem('badminton_matches', JSON.stringify(matchHistory));
         }
