@@ -44,11 +44,14 @@ async function loadLocalData() {
             if (data.matches) matchHistory = data.matches;
             if (data.nextPlayerId) window.nextPlayerId = data.nextPlayerId;
             console.log('数据加载成功:', players.length, '名选手', matchHistory.length, '场比赛');
+            return;
         }
     } catch (e) {
-        console.error('加载 data.json 失败:', e);
-        alert('无法加载数据文件，请检查网络连接或联系管理员');
+        console.warn('无法加载 data.json（本地文件限制），使用内置初始数据');
     }
+
+    // 如果 fetch 失败（本地文件限制），使用内置的初始数据
+    console.log('使用内置初始数据');
 }
 
 // 保存数据到本地（仅保存到 localStorage，供管理员导出）
