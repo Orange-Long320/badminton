@@ -34,63 +34,56 @@ let selectedCalendarDate = null;
 
 // 加载数据
 async function loadLocalData() {
-    try {
-        // 先从 localStorage 加载
-        const savedPlayers = localStorage.getItem('badminton_players');
-        const savedDoubles = localStorage.getItem('badminton_doubles');
-        const savedMatches = localStorage.getItem('badminton_matches');
-        const savedNextId = localStorage.getItem('badminton_nextPlayerId');
+    // 先从 localStorage 加载
+    const savedPlayers = localStorage.getItem('badminton_players');
+    const savedDoubles = localStorage.getItem('badminton_doubles');
+    const savedMatches = localStorage.getItem('badminton_matches');
+    const savedNextId = localStorage.getItem('badminton_nextPlayerId');
 
-        if (savedPlayers) players = JSON.parse(savedPlayers);
-        if (savedDoubles) doublesTeams = JSON.parse(savedDoubles);
-        if (savedMatches) matchHistory = JSON.parse(savedMatches);
-        if (savedNextId) window.nextPlayerId = parseInt(savedNextId);
+    if (savedPlayers) players = JSON.parse(savedPlayers);
+    if (savedDoubles) doublesTeams = JSON.parse(savedDoubles);
+    if (savedMatches) matchHistory = JSON.parse(savedMatches);
+    if (savedNextId) window.nextPlayerId = parseInt(savedNextId);
 
-        console.log('从 localStorage 加载数据:', players.length, '名选手');
+    console.log('从 localStorage 加载数据:', players.length, '名选手');
 
-        // 尝试从 GitHub 加载最新数据
+    // 尝试从 GitHub 加载最新数据（仅当有配置时）
+    const githubToken = localStorage.getItem('github_token');
+    if (githubToken) {
         await loadFromGithub();
-
-        // 初始化缺失的 draws 字段（兼容性处理）
-        players.forEach(p => {
-            if (typeof p.draws === 'undefined') p.draws = 0;
-        });
-        doublesTeams.forEach(t => {
-            if (typeof t.draws === 'undefined') t.draws = 0;
-        });
-
-        console.log('数据加载完成');
-        return;
-    } catch (e) {
-        console.error('加载数据出错:', e);
     }
 
-    // 如果失败，使用内置初始数据
-    console.log('使用内置初始数据');
-    useDefaultData();
+    // 初始化缺失的 draws 字段（兼容性处理）
+    players.forEach(p => {
+        if (typeof p.draws === 'undefined') p.draws = 0;
+    });
+    doublesTeams.forEach(t => {
+        if (typeof t.draws === 'undefined') t.draws = 0;
+    });
+
+    console.log('数据加载完成');
 }
 
-// 从 GitHub 加载最新数据
+// 从 GitHub 加载最新数据（仅用于有 Token 的配置用户）
 async function loadFromGithub() {
     try {
-        // 获取 GitHub 配置
         const owner = localStorage.getItem('github_owner') || 'Orange-Long320';
         const repo = localStorage.getItem('github_repo') || 'badminton';
         const branch = localStorage.getItem('github_branch') || 'gh-pages';
 
-        // 添加时间戳防止缓存
+        if (!owner || !repo || !branch) {
+            return;
+        }
+
         const timestamp = Date.now();
         const response = await fetch(`https://raw.githubusercontent.com/${owner}/${repo}/${branch}/data.json?t=${timestamp}`);
 
         if (!response.ok) {
-            console.log('GitHub 上暂无 data.json 文件');
             return;
         }
 
         const data = await response.json();
-        console.log('从 GitHub 加载数据成功:', data);
 
-        // 更新本地数据
         if (data.players) {
             players = data.players;
             localStorage.setItem('badminton_players', JSON.stringify(players));
