@@ -290,6 +290,7 @@
             <!-- 导航 -->
             <div class="admin-nav">
                 <button class="active" data-tab="record">📝 录入比赛</button>
+                <button data-tab="players">👤 选手管理</button>
                 <button data-tab="manage">📊 数据管理</button>
                 <button data-tab="matches">📅 比赛列表</button>
             </div>
@@ -372,6 +373,83 @@
                         </button>
                     </div>
                 </form>
+            </div>
+
+            <!-- 选手管理 -->
+            <div class="admin-section hidden" id="tab-players">
+                <h2>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                        <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                    选手管理
+                </h2>
+
+                <!-- 添加/编辑选手表单 -->
+                <div style="background: var(--color-bg); padding: var(--spacing-lg); border-radius: var(--radius-md); margin-bottom: var(--spacing-lg);">
+                    <h3 style="margin-bottom: 16px;" id="player-form-title">➕ 添加新选手</h3>
+
+                    <form id="player-form">
+                        <input type="hidden" id="edit-player-id">
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="player-name">姓名</label>
+                                <input type="text" id="player-name" placeholder="输入姓名" required style="width: 100%;">
+                            </div>
+                            <div class="form-group">
+                                <label for="player-signature">签名/垃圾话</label>
+                                <input type="text" id="player-signature" placeholder="例如：羽球狂人" style="width: 100%;">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="player-avatar-type">头像类型</label>
+                                <select id="player-avatar-type" style="width: 100%;">
+                                    <option value="text">文字头像</option>
+                                    <option value="upload">上传图片</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="text-avatar-group">
+                                <label for="player-avatar">文字头像（1-2 个字）</label>
+                                <input type="text" id="player-avatar" placeholder="例如：龙" maxlength="2" style="width: 100%;">
+                            </div>
+                            <div class="form-group hidden" id="upload-avatar-group">
+                                <label for="player-avatar-upload">上传头像图片</label>
+                                <input type="file" id="player-avatar-upload" accept="image/*" style="width: 100%;">
+                                <div id="avatar-preview" style="margin-top: 8px;"></div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="player-play-type">擅长类型</label>
+                                <select id="player-play-type" style="width: 100%;">
+                                    <option value="both">单打/双打</option>
+                                    <option value="singles">只打单打</option>
+                                    <option value="doubles">只打双打</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 20px;">
+                            <button type="submit" class="btn btn-primary">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                                    <line x1="12" y1="5" x2="12" y2="19"/>
+                                    <line x1="5" y1="12" x2="19" y2="12"/>
+                                </svg>
+                                <span id="player-form-submit-text">添加选手</span>
+                            </button>
+                            <button type="button" class="btn btn-secondary" id="cancel-edit-player" style="margin-left: 12px;">取消</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 选手列表 -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px;" id="players-list">
+                    <!-- 选手卡片由 JS 渲染 -->
+                </div>
             </div>
 
             <!-- 数据管理 -->
@@ -542,13 +620,201 @@
             loadStats();
             populatePlayerSelects();
             renderMatchList();
+            renderPlayersList(); // 渲染选手列表
 
             // 设置默认日期为今天
             document.getElementById('match-date').value = new Date().toISOString().split('T')[0];
         }
 
-        // 填充选手选择框
-        function populatePlayerSelects() {
+        // ================================
+        // 选手管理功能
+        // ================================
+
+        // 渲染选手列表
+        function renderPlayersList() {
+            const container = document.getElementById('players-list');
+            if (!container) return;
+
+            container.innerHTML = players.map(player => {
+                const avatarDisplay = player.avatar && player.avatar.startsWith('data:')
+                    ? `<img src="${player.avatar}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;">`
+                    : `<div class="partner-avatar" style="width:48px;height:48px;font-size:1.25rem;">${player.avatar || player.name.charAt(0)}</div>`;
+
+                return `
+                    <div class="player-card" style="background:var(--color-surface);border-radius:var(--radius-md);padding:var(--spacing-md);box-shadow:var(--shadow-sm);">
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+                            ${avatarDisplay}
+                            <div>
+                                <div style="font-weight:600;color:var(--color-text-primary);">${player.name}</div>
+                                <div style="font-size:12px;color:var(--color-text-muted);">${player.signature || '暂无签名'}</div>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:8px;">
+                            <button class="btn btn-secondary" onclick="editPlayer(${player.id})" style="flex:1;font-size:13px;padding:6px;">编辑</button>
+                            <button class="btn btn-danger" onclick="deletePlayer(${player.id})" style="flex:1;font-size:13px;padding:6px;">删除</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 头像类型切换
+        document.getElementById('player-avatar-type')?.addEventListener('change', function() {
+            const textGroup = document.getElementById('text-avatar-group');
+            const uploadGroup = document.getElementById('upload-avatar-group');
+            if (this.value === 'upload') {
+                textGroup.classList.add('hidden');
+                uploadGroup.classList.remove('hidden');
+            } else {
+                textGroup.classList.remove('hidden');
+                uploadGroup.classList.add('hidden');
+            }
+        });
+
+        // 头像上传预览
+        document.getElementById('player-avatar-upload')?.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('avatar-preview');
+                preview.innerHTML = `<img src="${e.target.result}" style="width:64px;height:64px;border-radius:50%;object-fit:cover;">`;
+                preview.dataset.avatarData = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // 编辑选手
+        function editPlayer(playerId) {
+            const player = players.find(p => p.id === playerId);
+            if (!player) return;
+
+            document.getElementById('edit-player-id').value = player.id;
+            document.getElementById('player-name').value = player.name;
+            document.getElementById('player-signature').value = player.signature || '';
+            document.getElementById('player-play-type').value = player.play_type || 'both';
+
+            // 设置头像
+            if (player.avatar && player.avatar.startsWith('data:')) {
+                document.getElementById('player-avatar-type').value = 'upload';
+                document.getElementById('text-avatar-group').classList.add('hidden');
+                document.getElementById('upload-avatar-group').classList.remove('hidden');
+                document.getElementById('avatar-preview').innerHTML = `<img src="${player.avatar}" style="width:64px;height:64px;border-radius:50%;object-fit:cover;">`;
+                document.getElementById('avatar-preview').dataset.avatarData = player.avatar;
+            } else {
+                document.getElementById('player-avatar-type').value = 'text';
+                document.getElementById('text-avatar-group').classList.remove('hidden');
+                document.getElementById('upload-avatar-group').classList.add('hidden');
+                document.getElementById('player-avatar').value = player.avatar || '';
+            }
+
+            document.getElementById('player-form-title').textContent = '✏️ 编辑选手';
+            document.getElementById('player-form-submit-text').textContent = '保存修改';
+        }
+
+        // 取消编辑
+        document.getElementById('cancel-edit-player')?.addEventListener('click', function() {
+            resetPlayerForm();
+        });
+
+        // 重置表单
+        function resetPlayerForm() {
+            document.getElementById('edit-player-id').value = '';
+            document.getElementById('player-name').value = '';
+            document.getElementById('player-signature').value = '';
+            document.getElementById('player-avatar').value = '';
+            document.getElementById('player-avatar-upload').value = '';
+            document.getElementById('player-play-type').value = 'both';
+            document.getElementById('avatar-preview').innerHTML = '';
+            delete document.getElementById('avatar-preview').dataset.avatarData;
+            document.getElementById('text-avatar-group').classList.remove('hidden');
+            document.getElementById('upload-avatar-group').classList.add('hidden');
+            document.getElementById('player-avatar-type').value = 'text';
+            document.getElementById('player-form-title').textContent = '➕ 添加新选手';
+            document.getElementById('player-form-submit-text').textContent = '添加选手';
+        }
+
+        // 添加/更新选手
+        document.getElementById('player-form')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const editId = document.getElementById('edit-player-id').value;
+            const name = document.getElementById('player-name').value.trim();
+            const signature = document.getElementById('player-signature').value.trim();
+            const playType = document.getElementById('player-play-type').value;
+            const avatarType = document.getElementById('player-avatar-type').value;
+
+            let avatar;
+            if (avatarType === 'upload') {
+                const preview = document.getElementById('avatar-preview');
+                avatar = preview.dataset.avatarData || '';
+            } else {
+                avatar = document.getElementById('player-avatar').value.trim() || name.charAt(0);
+            }
+
+            if (editId) {
+                // 更新选手
+                const player = players.find(p => p.id == editId);
+                if (player) {
+                    player.name = name;
+                    player.avatar = avatar;
+                    player.signature = signature;
+                    player.play_type = playType;
+                    showToast('选手已更新');
+                }
+            } else {
+                // 添加新选手
+                const newPlayer = {
+                    id: window.nextPlayerId || 5,
+                    name: name,
+                    avatar: avatar,
+                    signature: signature,
+                    play_type: playType,
+                    points: 0,
+                    wins: 0,
+                    losses: 0,
+                    draws: 0
+                };
+                players.push(newPlayer);
+                window.nextPlayerId = (window.nextPlayerId || 4) + 1;
+                showToast('选手已添加');
+            }
+
+            // 保存并刷新
+            saveLocalData();
+            populatePlayerSelects();
+            renderPlayersList();
+            resetPlayerForm();
+        });
+
+        // 删除选手
+        function deletePlayer(playerId) {
+            if (!confirm('确定要删除这名选手吗？相关的比赛记录也会被删除。')) return;
+
+            const index = players.findIndex(p => p.id === playerId);
+            if (index === -1) return;
+
+            // 删除相关比赛
+            matchHistory = matchHistory.filter(m => {
+                if (m.type === 'singles') {
+                    return m.team1 !== players[index].name && m.team2 !== players[index].name;
+                } else {
+                    return !m.team1.includes(players[index].name) && !m.team2.includes(players[index].name);
+                }
+            });
+
+            // 删除双打组合
+            doublesTeams = doublesTeams.filter(t =>
+                !t.players.includes(playerId)
+            );
+
+            players.splice(index, 1);
+            saveLocalData();
+            populatePlayerSelects();
+            renderPlayersList();
+            showToast('选手已删除');
+        }
             const selects = ['team1-player1', 'team1-player2', 'team2-player1', 'team2-player2'];
             const options = players.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
             selects.forEach(id => {
