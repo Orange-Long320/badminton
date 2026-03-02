@@ -102,6 +102,9 @@ async function loadFromGithub() {
         }
 
         console.log('已从 GitHub 同步最新数据');
+
+        // 同步数据后重新计算统计数据
+        recalculateDoublesStats();
     } catch (e) {
         console.warn('从 GitHub 加载失败:', e.message);
     }
@@ -148,6 +151,87 @@ function resetAllData() {
         localStorage.clear();
         location.reload();
     }
+}
+
+// 根据比赛记录重新计算双打组合数据和选手数据
+function recalculateDoublesStats() {
+    // 重置所有双打组合的统计数据
+    doublesTeams.forEach(team => {
+        team.points = 0;
+        team.wins = 0;
+        team.losses = 0;
+        team.draws = 0;
+    });
+
+    // 重置所有选手的统计数据
+    players.forEach(player => {
+        player.points = 0;
+        player.wins = 0;
+        player.losses = 0;
+        player.draws = 0;
+    });
+
+    // 遍历所有比赛记录，重新计算
+    matchHistory.forEach(match => {
+        const scores = match.score.split(':');
+        const team1Score = parseInt(scores[0]) || 0;
+        const team2Score = parseInt(scores[1]) || 0;
+
+        if (match.type === 'singles') {
+            // 单打比赛
+            const player1 = players.find(p => p.name === match.team1);
+            const player2 = players.find(p => p.name === match.team2);
+
+            if (player1 && player2) {
+                // 计算净胜分
+                const netWins = team1Score - team2Score;
+                player1.points += netWins;
+                player2.points -= netWins;
+
+                // 按小分记录胜/负/平
+                player1.wins += team1Score;
+                player1.losses += team2Score;
+                player2.wins += team2Score;
+                player2.losses += team1Score;
+            }
+        } else {
+            // 双打比赛
+            const team1Names = match.team1.split('/').sort();
+            const team2Names = match.team2.split('/').sort();
+
+            // 找到对应的双打组合
+            const doublesTeam1 = doublesTeams.find(t => {
+                const teamNames = t.players.map(id => players.find(p => p.id === id)?.name).sort();
+                return teamNames[0] === team1Names[0] && teamNames[1] === team1Names[1];
+            });
+
+            const doublesTeam2 = doublesTeams.find(t => {
+                const teamNames = t.players.map(id => players.find(p => p.id === id)?.name).sort();
+                return teamNames[0] === team2Names[0] && teamNames[1] === team2Names[1];
+            });
+
+            if (doublesTeam1 && doublesTeam2) {
+                // 计算净胜分
+                const netWins = team1Score - team2Score;
+                doublesTeam1.points += netWins;
+                doublesTeam2.points -= netWins;
+
+                // 按小分记录胜/负/平
+                doublesTeam1.wins += team1Score;
+                doublesTeam1.losses += team2Score;
+                doublesTeam2.wins += team2Score;
+                doublesTeam2.losses += team1Score;
+            } else {
+                console.log('未找到双打组合:', match.team1, 'vs', match.team2);
+            }
+        }
+    });
+
+    // 保存重新计算后的数据
+    saveLocalData();
+    console.log('双打和选手数据已重新计算');
+    console.log('双打组合数据:', doublesTeams);
+    console.log('比赛记录:', matchHistory);
 }
 
 // ================================
@@ -440,67 +524,27 @@ function batchDeleteMatches() {
     });
 
     // 逐个撤销战绩并删除
-    matchesToDelete.forEach(match => {
-        // 解析比分
-        const scores = match.score.split(':');
-        const team1Score = parseInt(scores[0]) || 0;
-        const team2Score = parseInt(scores[1]) || 0;
+// 批量删除比赛记录
+function batchDeleteMatches() {
+    if (selectedMatches.size === 0) {
+        alert('请先选择要删除的比赛记录');
+        return;
+    }
 
-        const getPlayerByName = (name) => players.find(p => p.name === name);
+    if (!confirm(`确定要删除 ${selectedMatches.size} 条比赛记录吗？此操作不可恢复。`)) {
+        return;
+    }
 
-        if (match.type === 'singles') {
-            const player1 = getPlayerByName(match.team1);
-            const player2 = getPlayerByName(match.team2);
+    const matchesToDelete = Array.from(selectedMatches);
 
-            if (player1 && player2) {
-                // 计算净胜场数
-                const netWins = team1Score - team2Score;
-                // 撤销：赢的场数减分，输的场数加分
-                player1.points -= netWins;
-                player2.points += netWins;
-
-                // 撤销胜/负记录
-                player1.wins -= team1Score;
-                player1.losses -= team2Score;
-                player2.wins -= team2Score;
-                player2.losses -= team1Score;
-            }
-        } else {
-            const team1Players = match.team1.split('/').sort();
-            const team2Players = match.team2.split('/').sort();
-
-            const doublesTeam1 = doublesTeams.find(t => {
-                const teamNames = t.players.map(id => players.find(p => p.id === id)?.name).sort();
-                return teamNames[0] === team1Players[0] && teamNames[1] === team1Players[1];
-            });
-
-            const doublesTeam2 = doublesTeams.find(t => {
-                const teamNames = t.players.map(id => players.find(p => p.id === id)?.name).sort();
-                return teamNames[0] === team2Players[0] && teamNames[1] === team2Players[1];
-            });
-
-            if (doublesTeam1 && doublesTeam2) {
-                const netWins = team1Score - team2Score;
-                doublesTeam1.points -= netWins;
-                doublesTeam2.points += netWins;
-
-                // 撤销胜/负记录
-                doublesTeam1.wins -= team1Score;
-                doublesTeam1.losses -= team2Score;
-                doublesTeam2.wins -= team2Score;
-                doublesTeam2.losses -= team1Score;
-            }
-        }
-
-        // 从数组中删除该记录
-        const index = matchHistory.findIndex(m => m.id === match.id);
-        if (index > -1) {
-            matchHistory.splice(index, 1);
-        }
-    });
+    // 删除选中的比赛记录
+    matchHistory = matchHistory.filter(m => !matchesToDelete.includes(m.id));
 
     // 清空选择
     selectedMatches.clear();
+
+    // 重新计算统计数据（确保数据一致性）
+    recalculateDoublesStats();
 
     // 保存数据到 localStorage
     saveLocalData();
@@ -527,73 +571,11 @@ function deleteMatch(matchId) {
         return;
     }
 
-    // 解析比分
-    const scores = match.score.split(':');
-    const team1Score = parseInt(scores[0]) || 0;
-    const team2Score = parseInt(scores[1]) || 0;
-
-    // 撤销积分更新
-    const getPlayerByName = (name) => players.find(p => p.name === name);
-
-    if (match.type === 'singles') {
-        const player1 = getPlayerByName(match.team1);
-        const player2 = getPlayerByName(match.team2);
-
-        if (player1 && player2) {
-            // 计算净胜场数
-            const netWins = team1Score - team2Score;
-            // 撤销：赢的场数减分，输的场数加分
-            player1.points -= netWins;
-            player2.points += netWins;
-
-            // 撤销胜/负/平记录
-            if (match.winner === 'team1') {
-                player1.wins--;
-                player2.losses--;
-            } else if (match.winner === 'team2') {
-                player1.losses--;
-                player2.wins--;
-            } else if (match.winner === 'draw') {
-                player1.draws--;
-                player2.draws--;
-            }
-        }
-    } else {
-        // 双打 - 找到对应的组合并撤销积分
-        const team1Players = match.team1.split('/').sort();
-        const team2Players = match.team2.split('/').sort();
-
-        const doublesTeam1 = doublesTeams.find(t => {
-            const teamNames = t.players.map(id => players.find(p => p.id === id)?.name).sort();
-            return teamNames[0] === team1Players[0] && teamNames[1] === team1Players[1];
-        });
-
-        const doublesTeam2 = doublesTeams.find(t => {
-            const teamNames = t.players.map(id => players.find(p => p.id === id)?.name).sort();
-            return teamNames[0] === team2Players[0] && teamNames[1] === team2Players[1];
-        });
-
-        if (doublesTeam1 && doublesTeam2) {
-            const netWins = team1Score - team2Score;
-            doublesTeam1.points -= netWins;
-            doublesTeam2.points += netWins;
-
-            // 撤销胜/负/平记录
-            if (match.winner === 'team1') {
-                doublesTeam1.wins--;
-                doublesTeam2.losses--;
-            } else if (match.winner === 'team2') {
-                doublesTeam1.losses--;
-                doublesTeam2.wins--;
-            } else if (match.winner === 'draw') {
-                doublesTeam1.draws--;
-                doublesTeam2.draws--;
-            }
-        }
-    }
-
     // 删除记录
     matchHistory.splice(matchIndex, 1);
+
+    // 重新计算统计数据（确保数据一致性）
+    recalculateDoublesStats();
 
     // 保存数据到 localStorage
     saveLocalData();
@@ -715,52 +697,38 @@ function submitMatch() {
     if (matchType === 'singles') {
         team1 = getPlayerName(document.getElementById('player1').value);
         team2 = getPlayerName(document.getElementById('opponent1').value);
-
-        // 更新选手积分：赢一把加 1 分，输一把减 1 分
-        const player1 = players.find(p => p.id == document.getElementById('player1').value);
-        const player2 = players.find(p => p.id == document.getElementById('opponent1').value);
-
-        if (player1 && player2) {
-            // 计算净胜场数
-            const netWins = player1Score - opponent1Score;
-            // 赢的场数加分，输的场数减分
-            player1.points += netWins;
-            player2.points -= netWins;
-
-            // 更新胜/负/平记录
-            if (player1Score > opponent1Score) {
-                player1.wins++;
-                player2.losses++;
-            } else if (player1Score < opponent1Score) {
-                player1.losses++;
-                player2.wins++;
-            } else {
-                player1.draws++;
-                player2.draws++;
-            }
-        }
+        // 单打选手的统计数据由 recalculateDoublesStats 统一计算（此处不修改）
     } else {
         const player1Id = document.getElementById('player1').value;
         const player2Id = document.getElementById('player2').value;
         const opponent1Id = document.getElementById('opponent1').value;
         const opponent2Id = document.getElementById('opponent2').value;
 
-        team1 = `${getPlayerName(player1Id)}/${getPlayerName(player2Id)}`;
-        team2 = `${getPlayerName(opponent1Id)}/${getPlayerName(opponent2Id)}`;
+        // 双打队伍名称按选手名字字母顺序排序，确保一致性
+        const team1Names = [getPlayerName(player1Id), getPlayerName(player2Id)].sort();
+        const team2Names = [getPlayerName(opponent1Id), getPlayerName(opponent2Id)].sort();
+        team1 = team1Names.join('/');
+        team2 = team2Names.join('/');
 
-        // 更新双打组合积分
-        const team1Players = [player1Id, player2Id].sort().join(',');
-        const team2Players = [opponent1Id, opponent2Id].sort().join(',');
+        // 如果双打组合不存在，创建新的（只初始化，不修改统计数据）
+        const team1Players = [parseInt(player1Id), parseInt(player2Id)].sort((a, b) => a - b).join(',');
+        const team2Players = [parseInt(opponent1Id), parseInt(opponent2Id)].sort((a, b) => a - b).join(',');
 
-        let doublesTeam1 = doublesTeams.find(t => t.players.sort().join(',') === team1Players);
-        let doublesTeam2 = doublesTeams.find(t => t.players.sort().join(',') === team2Players);
+        let doublesTeam1 = doublesTeams.find(t => {
+            const sortedTeamPlayers = [...t.players].sort((a, b) => a - b).join(',');
+            return sortedTeamPlayers === team1Players;
+        });
+        let doublesTeam2 = doublesTeams.find(t => {
+            const sortedTeamPlayers = [...t.players].sort((a, b) => a - b).join(',');
+            return sortedTeamPlayers === team2Players;
+        });
 
-        // 如果组合不存在，创建新的
+        // 如果组合不存在，创建新的（统计数据由 recalculateDoublesStats 统一计算）
         if (!doublesTeam1) {
             doublesTeam1 = {
                 id: doublesTeams.length + 1,
                 name: team1,
-                players: [parseInt(player1Id), parseInt(player2Id)],
+                players: [parseInt(player1Id), parseInt(player2Id)].sort((a, b) => a - b),
                 points: 0,
                 wins: 0,
                 losses: 0,
@@ -772,7 +740,7 @@ function submitMatch() {
             doublesTeam2 = {
                 id: doublesTeams.length + 1,
                 name: team2,
-                players: [parseInt(opponent1Id), parseInt(opponent2Id)],
+                players: [parseInt(opponent1Id), parseInt(opponent2Id)].sort((a, b) => a - b),
                 points: 0,
                 wins: 0,
                 losses: 0,
@@ -780,30 +748,12 @@ function submitMatch() {
             };
             doublesTeams.push(doublesTeam2);
         }
-
-        // 计算净胜场数
-        const netWins = player1Score - opponent1Score;
-        // 赢的场数加分，输的场数减分
-        doublesTeam1.points += netWins;
-        doublesTeam2.points -= netWins;
-
-        // 更新胜/负/平记录
-        if (player1Score > opponent1Score) {
-            doublesTeam1.wins++;
-            doublesTeam2.losses++;
-        } else if (player1Score < opponent1Score) {
-            doublesTeam1.losses++;
-            doublesTeam2.wins++;
-        } else {
-            doublesTeam1.draws++;
-            doublesTeam2.draws++;
-        }
     }
 
-    // 添加比赛记录
+    // 添加比赛记录（使用时间戳生成唯一 ID，避免删除后重复）
     const matchDate = document.getElementById('match-date').value || new Date().toISOString().split('T')[0];
     const newMatch = {
-        id: matchHistory.length + 1,
+        id: Date.now(),
         type: matchType,
         team1: team1,
         team2: team2,
@@ -816,6 +766,9 @@ function submitMatch() {
 
     // 保存数据到 localStorage
     saveLocalData();
+
+    // 重新计算双打统计数据（确保按小分计算）
+    recalculateDoublesStats();
 
     // 重新渲染
     renderSinglesLeaderboard();
@@ -1227,7 +1180,7 @@ function renderPlayerProfile() {
     const profileAvatar = document.getElementById('profile-avatar');
     if (!profileAvatar) return; // 不在个人页面
 
-    const playerId = getPlayerIdFromUrl();
+    let playerId = getPlayerIdFromUrl();
     if (!playerId) {
         // 如果没有指定选手 ID，默认显示第一个选手
         playerId = players[0].id;
@@ -1417,8 +1370,10 @@ function renderMatchHistoryList(matches) {
 
     container.innerHTML = matches.map(match => {
         const opponentDisplay = match.opponent.includes('/') ? match.opponent : match.opponent;
+        const resultClass = match.isDraw ? 'draw' : (match.isWin ? 'win' : 'loss');
+        const resultText = match.isDraw ? '平' : (match.isWin ? '胜' : '负');
         return `
-            <div class="match-history-item ${match.isWin ? 'win' : 'loss'}">
+            <div class="match-history-item ${resultClass}">
                 <div class="match-history-left">
                     <span class="match-history-date">${match.date}</span>
                     <div class="match-history-teams">
@@ -1430,7 +1385,7 @@ function renderMatchHistoryList(matches) {
                 </div>
                 <div class="match-history-right">
                     <span class="match-history-score">${match.score}</span>
-                    <span class="match-history-result ${match.isWin ? 'win' : 'loss'}">${match.isWin ? '胜' : '负'}</span>
+                    <span class="match-history-result ${resultClass}">${resultText}</span>
                 </div>
             </div>
         `;
@@ -1512,20 +1467,23 @@ function renderMatchdayMatches(matches) {
     }
 
     container.innerHTML = matches.map(match => {
+        const isDraw = match.winner === 'draw';
         const isWin = match.winner === 'team1';
+        const resultClass = isDraw ? 'draw' : (isWin ? 'win' : 'loss');
+        const resultText = isDraw ? '平' : (isWin ? '胜' : '负');
         return `
-            <div class="matchday-match-item ${isWin ? 'win' : 'loss'}">
+            <div class="matchday-match-item ${resultClass}">
                 <div class="matchday-match-left">
                     <span class="matchday-match-type">${match.type === 'singles' ? '单打' : '双打'}</span>
                     <div class="matchday-match-teams">
                         <span class="matchday-match-team ${isWin ? 'self' : ''}">${match.team1}</span>
                         <span class="matchday-match-vs">vs</span>
-                        <span class="matchday-match-team ${!isWin ? 'self' : ''}">${match.team2}</span>
+                        <span class="matchday-match-team ${!isWin &amp;&amp; !isDraw ? 'self' : ''}">${match.team2}</span>
                     </div>
                 </div>
                 <div class="matchday-match-right">
                     <span class="matchday-match-score">${match.score}</span>
-                    <span class="matchday-match-result ${isWin ? 'win' : 'loss'}">${isWin ? '胜' : '负'}</span>
+                    <span class="matchday-match-result ${resultClass}">${resultText}</span>
                 </div>
             </div>
         `;
@@ -1754,12 +1712,18 @@ async function initializePage() {
     // 检查是否在比赛日详情页
     const isMatchdayPage = document.getElementById('matchday-date') !== null;
 
+    // 检查是否在管理后台（admin.html）
+    const isAdminPage = document.getElementById('auth-overlay') !== null;
+
     if (isProfilePage) {
         // 在个人页面，渲染个人资料
         renderPlayerProfile();
     } else if (isMatchdayPage) {
         // 在比赛日详情页，渲染比赛日数据
         renderMatchdayPage();
+    } else if (isAdminPage) {
+        // 在管理后台，不需要渲染首页元素
+        return;
     } else {
         // 在主页，执行原有的初始化逻辑
         // 初始渲染
