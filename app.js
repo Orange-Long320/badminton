@@ -1264,7 +1264,7 @@ function renderVsStats(currentPlayer) {
     const container = document.getElementById('vs-stats');
     if (!container) return;
 
-    // 计算当前选手与其他每个选手的单打对战记录
+    // 计算当前选手与其他每个选手的单打对战记录（统计小分）
     const vsRecords = [];
 
     players.forEach(opponent => {
@@ -1285,19 +1285,36 @@ function renderVsStats(currentPlayer) {
             const opponentInTeam2 = team2Name === opponent.name;
 
             // 只有两人直接对抗才统计
-            if (currentPlayerInTeam1 && opponentInTeam2) {
-                if (match.winner === 'team1') wins++;
-                else if (match.winner === 'team2') losses++;
-                else if (match.winner === 'draw') draws++;
-            } else if (currentPlayerInTeam2 && opponentInTeam1) {
-                if (match.winner === 'team2') wins++;
-                else if (match.winner === 'team1') losses++;
-                else if (match.winner === 'draw') draws++;
+            if ((currentPlayerInTeam1 && opponentInTeam2) || (currentPlayerInTeam2 && opponentInTeam1)) {
+                // 解析小分（如 "3:0" → 3 和 0）
+                const scoreParts = match.score.split(':');
+                const team1Score = parseInt(scoreParts[0]) || 0;
+                const team2Score = parseInt(scoreParts[1]) || 0;
+
+                // 确定当前选手的得分和对手的得分
+                let playerScore, opponentScore;
+
+                if (currentPlayerInTeam1) {
+                    playerScore = team1Score;
+                    opponentScore = team2Score;
+                } else {
+                    playerScore = team2Score;
+                    opponentScore = team1Score;
+                }
+
+                // 统计小分
+                wins += playerScore;
+                losses += opponentScore;
+
+                // 如果大场是平局，小分也记为平局
+                if (match.winner === 'draw') {
+                    draws += 1; // 平局场次
+                }
             }
         });
 
-        const totalGames = wins + losses + draws;
-        const winRate = totalGames > 0 ? (((wins + draws * 0.5) / totalGames) * 100) : 0;
+        const totalGames = wins + losses;
+        const winRate = totalGames > 0 ? ((wins / totalGames) * 100) : 0;
 
         vsRecords.push({
             opponent: opponent,
