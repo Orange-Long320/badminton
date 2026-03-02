@@ -422,50 +422,46 @@ let batchMode = false;
 let selectedMatches = new Set();
 
 function renderMatchHistory() {
-    const container = document.querySelector('.match-list');
+    const container = document.getElementById('recent-matches');
+    if (!container) return;
+
     const recentMatches = matchHistory.slice(0, 5);
 
-    container.innerHTML = recentMatches.map((match, index) => {
-        const winner = match.winner === 'team1' ? match.team1 : (match.winner === 'team2' ? match.team2 : '平局');
-        const isChecked = selectedMatches.has(match.id);
+    container.innerHTML = recentMatches.map((match) => {
+        const scores = match.score.split(':');
+        const team1Score = parseInt(scores[0]) || 0;
+        const team2Score = parseInt(scores[1]) || 0;
+
+        let resultClass, resultText;
+        if (match.winner === 'draw') {
+            resultClass = 'draw';
+            resultText = '平';
+        } else if (match.winner === 'team1') {
+            resultClass = 'win';
+            resultText = '胜';
+        } else {
+            resultClass = 'loss';
+            resultText = '负';
+        }
+
         return `
-            <div class="match-item ${isChecked ? 'selected' : ''}" data-match-id="${match.id}">
-                <div class="match-teams">
-                    <label class="match-checkbox" style="display: ${batchMode ? 'flex' : 'none'}">
-                        <input type="checkbox" ${isChecked ? 'checked' : ''} data-match-id="${match.id}">
-                    </label>
-                    <span>${match.team1}</span>
-                    <span class="match-score">${match.score}</span>
-                    <span>${match.team2}</span>
+            <div class="match-history-item ${resultClass}">
+                <div class="match-history-left">
+                    <span class="match-history-date">${match.date}</span>
+                    <div class="match-history-teams">
+                        <span class="match-history-team">${match.team1}</span>
+                        <span class="match-history-vs">vs</span>
+                        <span class="match-history-team">${match.team2}</span>
+                    </div>
+                    <span class="match-history-type">${match.type === 'singles' ? '单打' : '双打'}</span>
                 </div>
-                <div class="match-actions-right" style="${batchMode ? 'display: none' : ''}">
-                    <span class="match-winner">${winner}${match.winner !== 'draw' ? ' 胜' : ''}</span>
-                    <button class="btn-delete-match" data-match-id="${match.id}" title="删除记录">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="3 6 5 6 21 6"/>
-                            <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
-                        </svg>
-                    </button>
+                <div class="match-history-right">
+                    <span class="match-history-score">${match.score}</span>
+                    <span class="match-history-result ${resultClass}">${resultText}</span>
                 </div>
             </div>
         `;
     }).join('');
-
-    // 绑定删除按钮事件
-    container.querySelectorAll('.btn-delete-match').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const matchId = parseInt(e.currentTarget.dataset.matchId);
-            deleteMatch(matchId);
-        });
-    });
-
-    // 绑定复选框事件
-    container.querySelectorAll('.match-checkbox input').forEach(checkbox => {
-        checkbox.addEventListener('change', (e) => {
-            const matchId = parseInt(e.target.dataset.matchId);
-            toggleMatchSelection(matchId);
-        });
-    });
 }
 
 // 切换比赛选择状态
@@ -799,8 +795,14 @@ function renderCalendar() {
     // 获取比赛日
     const matchDays = getMatchDays(year, month);
 
-    // 渲染日期
+    // 渲染日历 - 包含星期标题和日期
     let daysHtml = '';
+
+    // 星期标题
+    const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+    weekdays.forEach(day => {
+        daysHtml += `<div class="calendar-weekday">${day}</div>`;
+    });
 
     // 空白格子
     for (let i = 0; i < startDay; i++) {
@@ -814,8 +816,8 @@ function renderCalendar() {
         const isToday = isCurrentMonth && day === today.getDate();
 
         let classes = 'calendar-day';
-        if (isMatchDay) classes += ' match-day';
-        if (isToday) classes += ' current';
+        if (isMatchDay) classes += ' has-match';
+        if (isToday) classes += ' today';
 
         daysHtml += `<div class="${classes}" data-date="${dateStr}">${day}</div>`;
     }
