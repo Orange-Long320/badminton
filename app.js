@@ -1264,6 +1264,9 @@ function renderVsStats(currentPlayer) {
     const container = document.getElementById('vs-stats');
     if (!container) return;
 
+    console.log('renderVsStats - currentPlayer:', currentPlayer.name);
+    console.log('renderVsStats - matchHistory:', matchHistory);
+
     // 计算当前选手与其他每个选手的单打对战记录
     const vsRecords = [];
 
@@ -1272,7 +1275,9 @@ function renderVsStats(currentPlayer) {
 
         let wins = 0, losses = 0, draws = 0;
 
-        matchHistory.forEach(match => {
+        console.log(`\n=== 计算 vs ${opponent.name} ===`);
+
+        matchHistory.forEach((match, index) => {
             if (match.type !== 'singles') return; // 只统计单打
 
             const team1Name = match.team1;
@@ -1284,17 +1289,39 @@ function renderVsStats(currentPlayer) {
             const opponentInTeam1 = team1Name === opponent.name;
             const opponentInTeam2 = team2Name === opponent.name;
 
+            console.log(`比赛${index}: ${team1Name} vs ${team2Name},  winner=${match.winner}`);
+            console.log(`  currentPlayerInTeam1=${currentPlayerInTeam1}, currentPlayerInTeam2=${currentPlayerInTeam2}`);
+            console.log(`  opponentInTeam1=${opponentInTeam1}, opponentInTeam2=${opponentInTeam2}`);
+
             // 只有两人直接对抗才统计
             if (currentPlayerInTeam1 && opponentInTeam2) {
-                if (match.winner === 'team1') wins++;
-                else if (match.winner === 'team2') losses++;
-                else if (match.winner === 'draw') draws++;
+                if (match.winner === 'team1') {
+                    wins++;
+                    console.log(`  → ${currentPlayer.name} 胜 (team1)`);
+                } else if (match.winner === 'team2') {
+                    losses++;
+                    console.log(`  → ${currentPlayer.name} 负 (team2)`);
+                } else if (match.winner === 'draw') {
+                    draws++;
+                    console.log(`  → 平局`);
+                }
             } else if (currentPlayerInTeam2 && opponentInTeam1) {
-                if (match.winner === 'team2') wins++;
-                else if (match.winner === 'team1') losses++;
-                else if (match.winner === 'draw') draws++;
+                if (match.winner === 'team2') {
+                    wins++;
+                    console.log(`  → ${currentPlayer.name} 胜 (team2)`);
+                } else if (match.winner === 'team1') {
+                    losses++;
+                    console.log(`  → ${currentPlayer.name} 负 (team1)`);
+                } else if (match.winner === 'draw') {
+                    draws++;
+                    console.log(`  → 平局`);
+                }
+            } else {
+                console.log(`  → 不匹配（两人未直接对抗）`);
             }
         });
+
+        console.log(`结果：${wins}胜${losses}负${draws}平\n`);
 
         const totalGames = wins + losses + draws;
         const winRate = totalGames > 0 ? (((wins + draws * 0.5) / totalGames) * 100) : 0;
@@ -1311,6 +1338,8 @@ function renderVsStats(currentPlayer) {
 
     // 按胜率排序（从高到低）
     vsRecords.sort((a, b) => b.winRate - a.winRate);
+
+    console.log('最终 vsRecords:', vsRecords);
 
     // 渲染 HTML
     if (vsRecords.length === 0) {
