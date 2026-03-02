@@ -911,20 +911,35 @@
                 const team1Player2Id = document.getElementById('team1-player2').value;
                 const team2Player2Id = document.getElementById('team2-player2').value;
 
-                team1 = `${getPlayerName(team1Player1Id)}/${getPlayerName(team1Player2Id)}`;
-                team2 = `${getPlayerName(team2Player1Id)}/${getPlayerName(team2Player2Id)}`;
+                // 生成队伍名称（按字母顺序排序，确保一致性）
+                const player1Name = getPlayerName(team1Player1Id);
+                const player2Name = getPlayerName(team1Player2Id);
+                const player3Name = getPlayerName(team2Player1Id);
+                const player4Name = getPlayerName(team2Player2Id);
 
-                const team1Players = [team1Player1Id, team1Player2Id].sort().join(',');
-                const team2Players = [team2Player1Id, team2Player2Id].sort().join(',');
+                // 排序后生成队名，确保 "林/龙" 和 "龙/林" 被视为同一组合
+                const team1Names = [player1Name, player2Name].sort();
+                const team2Names = [player3Name, player4Name].sort();
+                team1 = team1Names.join('/');
+                team2 = team2Names.join('/');
 
-                let doublesTeam1 = doublesTeams.find(t => t.players.sort().join(',') === team1Players);
-                let doublesTeam2 = doublesTeams.find(t => t.players.sort().join(',') === team2Players);
+                const team1Players = [parseInt(team1Player1Id), parseInt(team1Player2Id)].sort((a, b) => a - b);
+                const team2Players = [parseInt(team2Player1Id), parseInt(team2Player2Id)].sort((a, b) => a - b);
+
+                let doublesTeam1 = doublesTeams.find(t => {
+                    const sortedPlayers = [...t.players].sort((a, b) => a - b);
+                    return sortedPlayers[0] === team1Players[0] && sortedPlayers[1] === team1Players[1];
+                });
+                let doublesTeam2 = doublesTeams.find(t => {
+                    const sortedPlayers = [...t.players].sort((a, b) => a - b);
+                    return sortedPlayers[0] === team2Players[0] && sortedPlayers[1] === team2Players[1];
+                });
 
                 if (!doublesTeam1) {
                     doublesTeam1 = {
                         id: doublesTeams.length + 1,
                         name: team1,
-                        players: [parseInt(team1Player1Id), parseInt(team1Player2Id)],
+                        players: team1Players,
                         points: 0,
                         wins: 0,
                         losses: 0,
@@ -936,7 +951,7 @@
                     doublesTeam2 = {
                         id: doublesTeams.length + 1,
                         name: team2,
-                        players: [parseInt(team2Player1Id), parseInt(team2Player2Id)],
+                        players: team2Players,
                         points: 0,
                         wins: 0,
                         losses: 0,
