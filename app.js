@@ -39,10 +39,29 @@ async function loadLocalData() {
         const response = await fetch('data.json?t=' + Date.now());
         if (response.ok) {
             const data = await response.json();
-            if (data.players) players = data.players;
-            if (data.doublesTeams) doublesTeams = data.doublesTeams;
-            if (data.matches) matchHistory = data.matches;
-            if (data.nextPlayerId) window.nextPlayerId = data.nextPlayerId;
+
+            // 处理数据（支持字符串或数组格式）
+            if (data.players) {
+                players = typeof data.players === 'string'
+                    ? JSON.parse(data.players)
+                    : data.players;
+            }
+            if (data.doublesTeams || data.doubles) {
+                doublesTeams = typeof (data.doublesTeams || data.doubles) === 'string'
+                    ? JSON.parse(data.doublesTeams || data.doubles)
+                    : (data.doublesTeams || data.doubles);
+            }
+            if (data.matches) {
+                matchHistory = typeof data.matches === 'string'
+                    ? JSON.parse(data.matches)
+                    : data.matches;
+            }
+            if (data.nextPlayerId) {
+                window.nextPlayerId = typeof data.nextPlayerId === 'string'
+                    ? parseInt(data.nextPlayerId)
+                    : data.nextPlayerId;
+            }
+
             console.log('数据加载成功:', players.length, '名选手', matchHistory.length, '场比赛');
             return;
         }
