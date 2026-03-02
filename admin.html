@@ -659,31 +659,115 @@
         }
 
         // 头像类型切换
-        document.getElementById('player-avatar-type')?.addEventListener('change', function() {
-            const textGroup = document.getElementById('text-avatar-group');
-            const uploadGroup = document.getElementById('upload-avatar-group');
-            if (this.value === 'upload') {
-                textGroup.classList.add('hidden');
-                uploadGroup.classList.remove('hidden');
-            } else {
-                textGroup.classList.remove('hidden');
-                uploadGroup.classList.add('hidden');
-            }
-        });
+        const avatarTypeSelect = document.getElementById('player-avatar-type');
+        if (avatarTypeSelect) {
+            avatarTypeSelect.addEventListener('change', function() {
+                const textGroup = document.getElementById('text-avatar-group');
+                const uploadGroup = document.getElementById('upload-avatar-group');
+                if (textGroup && uploadGroup) {
+                    if (this.value === 'upload') {
+                        textGroup.classList.add('hidden');
+                        uploadGroup.classList.remove('hidden');
+                    } else {
+                        textGroup.classList.remove('hidden');
+                        uploadGroup.classList.add('hidden');
+                    }
+                }
+            });
+        }
 
         // 头像上传预览
-        document.getElementById('player-avatar-upload')?.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
+        const avatarUpload = document.getElementById('player-avatar-upload');
+        if (avatarUpload) {
+            avatarUpload.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
 
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const preview = document.getElementById('avatar-preview');
-                preview.innerHTML = `<img src="${e.target.result}" style="width:64px;height:64px;border-radius:50%;object-fit:cover;">`;
-                preview.dataset.avatarData = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        });
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('avatar-preview');
+                    if (preview) {
+                        preview.innerHTML = `<img src="${e.target.result}" style="width:64px;height:64px;border-radius:50%;object-fit:cover;">`;
+                        preview.dataset.avatarData = e.target.result;
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // 取消编辑按钮
+        const cancelBtn = document.getElementById('cancel-edit-player');
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', function() {
+                resetPlayerForm();
+            });
+        }
+
+        // 选手表单提交
+        const playerForm = document.getElementById('player-form');
+        if (playerForm) {
+            playerForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const editId = document.getElementById('edit-player-id').value;
+                const name = document.getElementById('player-name').value.trim();
+                const signature = document.getElementById('player-signature').value.trim();
+                const playType = document.getElementById('player-play-type').value;
+                const avatarType = document.getElementById('player-avatar-type').value;
+
+                let avatar;
+                if (avatarType === 'upload') {
+                    const preview = document.getElementById('avatar-preview');
+                    avatar = preview ? preview.dataset.avatarData || '' : '';
+                } else {
+                    avatar = document.getElementById('player-avatar').value.trim() || name.charAt(0);
+                }
+
+                if (editId) {
+                    // 更新选手
+                    const player = players.find(p => p.id == editId);
+                    if (player) {
+                        player.name = name;
+                        player.avatar = avatar;
+                        player.signature = signature;
+                        player.play_type = playType;
+                        showToast('选手已更新');
+                    }
+                } else {
+                    // 添加新选手
+                    const newPlayer = {
+                        id: window.nextPlayerId || 5,
+                        name: name,
+                        avatar: avatar,
+                        signature: signature,
+                        play_type: playType,
+                        points: 0,
+                        wins: 0,
+                        losses: 0,
+                        draws: 0
+                    };
+                    players.push(newPlayer);
+                    window.nextPlayerId = (window.nextPlayerId || 4) + 1;
+                    showToast('选手已添加');
+                }
+
+                // 保存并刷新
+                saveLocalData();
+                populatePlayerSelects();
+                renderPlayersList();
+                resetPlayerForm();
+            });
+        }
+
+        // 填充选手选择框
+        function populatePlayerSelects() {
+            const selects = ['team1-player1', 'team1-player2', 'team2-player1', 'team2-player2'];
+            const options = players.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+            selects.forEach(id => {
+                const select = document.getElementById(id);
+                if (select) select.innerHTML = options;
+            });
+        }
 
         // 编辑选手
         function editPlayer(playerId) {
@@ -697,96 +781,65 @@
 
             // 设置头像
             if (player.avatar && player.avatar.startsWith('data:')) {
-                document.getElementById('player-avatar-type').value = 'upload';
-                document.getElementById('text-avatar-group').classList.add('hidden');
-                document.getElementById('upload-avatar-group').classList.remove('hidden');
-                document.getElementById('avatar-preview').innerHTML = `<img src="${player.avatar}" style="width:64px;height:64px;border-radius:50%;object-fit:cover;">`;
-                document.getElementById('avatar-preview').dataset.avatarData = player.avatar;
+                const avatarType = document.getElementById('player-avatar-type');
+                if (avatarType) avatarType.value = 'upload';
+                const textGroup = document.getElementById('text-avatar-group');
+                const uploadGroup = document.getElementById('upload-avatar-group');
+                if (textGroup) textGroup.classList.add('hidden');
+                if (uploadGroup) uploadGroup.classList.remove('hidden');
+                const preview = document.getElementById('avatar-preview');
+                if (preview) {
+                    preview.innerHTML = `<img src="${player.avatar}" style="width:64px;height:64px;border-radius:50%;object-fit:cover;">`;
+                    preview.dataset.avatarData = player.avatar;
+                }
             } else {
-                document.getElementById('player-avatar-type').value = 'text';
-                document.getElementById('text-avatar-group').classList.remove('hidden');
-                document.getElementById('upload-avatar-group').classList.add('hidden');
-                document.getElementById('player-avatar').value = player.avatar || '';
+                const avatarType = document.getElementById('player-avatar-type');
+                if (avatarType) avatarType.value = 'text';
+                const textGroup = document.getElementById('text-avatar-group');
+                const uploadGroup = document.getElementById('upload-avatar-group');
+                if (textGroup) textGroup.classList.remove('hidden');
+                if (uploadGroup) uploadGroup.classList.add('hidden');
+                const avatarInput = document.getElementById('player-avatar');
+                if (avatarInput) avatarInput.value = player.avatar || '';
             }
 
-            document.getElementById('player-form-title').textContent = '✏️ 编辑选手';
-            document.getElementById('player-form-submit-text').textContent = '保存修改';
+            const title = document.getElementById('player-form-title');
+            const submitText = document.getElementById('player-form-submit-text');
+            if (title) title.textContent = '✏️ 编辑选手';
+            if (submitText) submitText.textContent = '保存修改';
         }
-
-        // 取消编辑
-        document.getElementById('cancel-edit-player')?.addEventListener('click', function() {
-            resetPlayerForm();
-        });
 
         // 重置表单
         function resetPlayerForm() {
-            document.getElementById('edit-player-id').value = '';
-            document.getElementById('player-name').value = '';
-            document.getElementById('player-signature').value = '';
-            document.getElementById('player-avatar').value = '';
-            document.getElementById('player-avatar-upload').value = '';
-            document.getElementById('player-play-type').value = 'both';
-            document.getElementById('avatar-preview').innerHTML = '';
-            delete document.getElementById('avatar-preview').dataset.avatarData;
-            document.getElementById('text-avatar-group').classList.remove('hidden');
-            document.getElementById('upload-avatar-group').classList.add('hidden');
-            document.getElementById('player-avatar-type').value = 'text';
-            document.getElementById('player-form-title').textContent = '➕ 添加新选手';
-            document.getElementById('player-form-submit-text').textContent = '添加选手';
+            const editId = document.getElementById('edit-player-id');
+            const name = document.getElementById('player-name');
+            const signature = document.getElementById('player-signature');
+            const avatar = document.getElementById('player-avatar');
+            const avatarUpload = document.getElementById('player-avatar-upload');
+            const playType = document.getElementById('player-play-type');
+            const preview = document.getElementById('avatar-preview');
+            const textGroup = document.getElementById('text-avatar-group');
+            const uploadGroup = document.getElementById('upload-avatar-group');
+            const avatarType = document.getElementById('player-avatar-type');
+            const title = document.getElementById('player-form-title');
+            const submitText = document.getElementById('player-form-submit-text');
+
+            if (editId) editId.value = '';
+            if (name) name.value = '';
+            if (signature) signature.value = '';
+            if (avatar) avatar.value = '';
+            if (avatarUpload) avatarUpload.value = '';
+            if (playType) playType.value = 'both';
+            if (preview) {
+                preview.innerHTML = '';
+                if (preview.dataset) delete preview.dataset.avatarData;
+            }
+            if (textGroup) textGroup.classList.remove('hidden');
+            if (uploadGroup) uploadGroup.classList.add('hidden');
+            if (avatarType) avatarType.value = 'text';
+            if (title) title.textContent = '➕ 添加新选手';
+            if (submitText) submitText.textContent = '添加选手';
         }
-
-        // 添加/更新选手
-        document.getElementById('player-form')?.addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            const editId = document.getElementById('edit-player-id').value;
-            const name = document.getElementById('player-name').value.trim();
-            const signature = document.getElementById('player-signature').value.trim();
-            const playType = document.getElementById('player-play-type').value;
-            const avatarType = document.getElementById('player-avatar-type').value;
-
-            let avatar;
-            if (avatarType === 'upload') {
-                const preview = document.getElementById('avatar-preview');
-                avatar = preview.dataset.avatarData || '';
-            } else {
-                avatar = document.getElementById('player-avatar').value.trim() || name.charAt(0);
-            }
-
-            if (editId) {
-                // 更新选手
-                const player = players.find(p => p.id == editId);
-                if (player) {
-                    player.name = name;
-                    player.avatar = avatar;
-                    player.signature = signature;
-                    player.play_type = playType;
-                    showToast('选手已更新');
-                }
-            } else {
-                // 添加新选手
-                const newPlayer = {
-                    id: window.nextPlayerId || 5,
-                    name: name,
-                    avatar: avatar,
-                    signature: signature,
-                    play_type: playType,
-                    points: 0,
-                    wins: 0,
-                    losses: 0,
-                    draws: 0
-                };
-                players.push(newPlayer);
-                window.nextPlayerId = (window.nextPlayerId || 4) + 1;
-                showToast('选手已添加');
-            }
-
-            // 保存并刷新
-            saveLocalData();
-            populatePlayerSelects();
-            renderPlayersList();
-            resetPlayerForm();
-        });
 
         // 删除选手
         function deletePlayer(playerId) {
@@ -794,33 +847,25 @@
 
             const index = players.findIndex(p => p.id === playerId);
             if (index === -1) return;
+            const playerName = players[index].name;
 
             // 删除相关比赛
             matchHistory = matchHistory.filter(m => {
                 if (m.type === 'singles') {
-                    return m.team1 !== players[index].name && m.team2 !== players[index].name;
+                    return m.team1 !== playerName && m.team2 !== playerName;
                 } else {
-                    return !m.team1.includes(players[index].name) && !m.team2.includes(players[index].name);
+                    return !m.team1.includes(playerName) && !m.team2.includes(playerName);
                 }
             });
 
             // 删除双打组合
-            doublesTeams = doublesTeams.filter(t =>
-                !t.players.includes(playerId)
-            );
+            doublesTeams = doublesTeams.filter(t => !t.players.includes(playerId));
 
             players.splice(index, 1);
             saveLocalData();
             populatePlayerSelects();
             renderPlayersList();
             showToast('选手已删除');
-        }
-            const selects = ['team1-player1', 'team1-player2', 'team2-player1', 'team2-player2'];
-            const options = players.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
-            selects.forEach(id => {
-                const select = document.getElementById(id);
-                if (select) select.innerHTML = options;
-            });
         }
 
         // 录入比赛表单提交
