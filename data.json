@@ -5,8 +5,8 @@
       "name": "龙鑫昊",
       "avatar": "龙",
       "points": 1,
-      "wins": 3,
-      "losses": 2,
+      "wins": 4,
+      "losses": 3,
       "signature": "羽球狂人",
       "play_type": "both"
     },
@@ -14,9 +14,9 @@
       "id": 2,
       "name": "黄玮",
       "avatar": "黄",
-      "points": 3,
-      "wins": 4,
-      "losses": 1,
+      "points": 2,
+      "wins": 5,
+      "losses": 3,
       "signature": "扣杀之王",
       "play_type": "both"
     },
@@ -24,9 +24,9 @@
       "id": 3,
       "name": "许力群",
       "avatar": "许",
-      "points": 0,
+      "points": -2,
       "wins": 2,
-      "losses": 2,
+      "losses": 4,
       "signature": "防守大师",
       "play_type": "both"
     },
@@ -34,8 +34,8 @@
       "id": 4,
       "name": "林智鑫",
       "avatar": "林",
-      "points": -4,
-      "wins": 1,
+      "points": -1,
+      "wins": 4,
       "losses": 5,
       "signature": "网前小球",
       "play_type": "both"
@@ -49,9 +49,9 @@
         1,
         2
       ],
-      "points": 0,
+      "points": -4,
       "wins": 6,
-      "losses": 6
+      "losses": 7
     },
     {
       "id": 2,
@@ -60,8 +60,8 @@
         3,
         4
       ],
-      "points": 0,
-      "wins": 6,
+      "points": 4,
+      "wins": 7,
       "losses": 6
     },
     {
@@ -88,6 +88,60 @@
     }
   ],
   "matches": [
+    {
+      "id": 13,
+      "type": "doubles",
+      "team1": "龙鑫昊/黄玮",
+      "team2": "林智鑫/许力群",
+      "score": "2:6",
+      "winner": "team2",
+      "date": "2026-03-02"
+    },
+    {
+      "id": 12,
+      "type": "singles",
+      "team1": "林智鑫",
+      "team2": "黄玮",
+      "score": "1:0",
+      "winner": "team1",
+      "date": "2026-03-02"
+    },
+    {
+      "id": 11,
+      "type": "singles",
+      "team1": "林智鑫",
+      "team2": "许力群",
+      "score": "1:0",
+      "winner": "team1",
+      "date": "2026-03-02"
+    },
+    {
+      "id": 10,
+      "type": "singles",
+      "team1": "黄玮",
+      "team2": "许力群",
+      "score": "1:0",
+      "winner": "team1",
+      "date": "2026-03-02"
+    },
+    {
+      "id": 9,
+      "type": "singles",
+      "team1": "龙鑫昊",
+      "team2": "林智鑫",
+      "score": "0:1",
+      "winner": "team2",
+      "date": "2026-03-02"
+    },
+    {
+      "id": 8,
+      "type": "singles",
+      "team1": "龙鑫昊",
+      "team2": "黄玮",
+      "score": "1:0",
+      "winner": "team1",
+      "date": "2026-03-02"
+    },
     {
       "id": 7,
       "type": "doubles",
