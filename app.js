@@ -154,6 +154,25 @@ function resetAllData() {
 // 工具函数
 // ================================
 
+// 生成头像 HTML（支持 Base64 图片和文字头像）
+function getAvatarHtml(avatar, size = 'normal') {
+    if (!avatar) return '<div class="player-avatar">?</div>';
+
+    const sizes = {
+        small: { width: 40, height: 40, fontSize: '1.1rem' },
+        normal: { width: 48, height: 48, fontSize: '1.25rem' },
+        large: { width: 80, height: 80, fontSize: '2.5rem' }
+    };
+    const s = sizes[size] || sizes.normal;
+
+    // 检查是否是 Base64 图片
+    if (avatar.startsWith('data:image')) {
+        return `<img src="${avatar}" alt="avatar" style="width:${s.width}px;height:${s.height}px;border-radius:50%;object-fit:cover;">`;
+    }
+    // 文字头像
+    return `<div class="player-avatar" style="width:${s.width}px;height:${s.height}px;font-size:${s.fontSize};">${avatar}</div>`;
+}
+
 // 计算胜率（用于显示）
 function calculateWinRate(points, totalGames) {
     if (totalGames === 0) return 0;
@@ -199,7 +218,7 @@ function renderSinglesLeaderboard() {
                 <td>${getRankHtml(index + 1)}</td>
                 <td>
                     <div class="player-cell">
-                        <div class="player-avatar">${player.avatar}</div>
+                        ${getAvatarHtml(player.avatar)}
                         <span class="player-name player-name-link">${player.name}</span>
                     </div>
                 </td>
@@ -253,7 +272,7 @@ function renderPlayerCarousel() {
     const pointsDisplay = points > 0 ? `+${points}` : points;
 
     container.innerHTML = `
-        <div class="avatar-large">${player.avatar}</div>
+        ${getAvatarHtml(player.avatar, 'large')}
         <div class="player-info">
             <div class="player-name">${player.name}</div>
             <div class="player-stats">
@@ -1220,8 +1239,14 @@ function renderPlayerProfile() {
     // 更新导航栏用户信息
     const navAvatar = document.getElementById('nav-user-avatar');
     const navName = document.getElementById('nav-user-name');
-    if (navAvatar) navAvatar.textContent = player.avatar;
     if (navName) navName.textContent = player.name;
+    if (navAvatar) {
+        if (player.avatar.startsWith('data:image')) {
+            navAvatar.innerHTML = `<img src="${player.avatar}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+        } else {
+            navAvatar.textContent = player.avatar || player.name.charAt(0);
+        }
+    }
 
     // 计算统计数据
     const stats = calculatePlayerStats(player);
@@ -1229,7 +1254,8 @@ function renderPlayerProfile() {
     const archRival = findArchRival(player);
 
     // 渲染基础信息
-    document.getElementById('profile-avatar').textContent = player.avatar;
+    const profileAvatar = document.getElementById('profile-avatar');
+    profileAvatar.innerHTML = getAvatarHtml(player.avatar, 'large');
     document.getElementById('profile-name').textContent = player.name;
 
     // 渲染核心数据
@@ -1356,7 +1382,7 @@ function renderVsStats(currentPlayer) {
         return `
             <div class="vs-stat-box">
                 <div class="vs-stat-header">
-                    <div class="vs-avatar">${record.opponent.avatar}</div>
+                    ${getAvatarHtml(record.opponent.avatar, 'small')}
                     <div class="vs-stat-info">
                         <div class="vs-opponent-name">${record.opponent.name}</div>
                         <div class="vs-stat-detail">${record.wins}胜${record.losses}负${drawText}</div>
