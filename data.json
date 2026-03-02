@@ -85,9 +85,42 @@
       "points": 0,
       "wins": 0,
       "losses": 0
+    },
+    {
+      "id": 5,
+      "name": "龙鑫昊/林智鑫",
+      "players": [
+        1,
+        4
+      ],
+      "points": -4,
+      "wins": 0,
+      "losses": 1,
+      "draws": 0
+    },
+    {
+      "id": 6,
+      "name": "黄玮/许力群",
+      "players": [
+        2,
+        3
+      ],
+      "points": 4,
+      "wins": 1,
+      "losses": 0,
+      "draws": 0
     }
   ],
   "matches": [
+    {
+      "id": 14,
+      "type": "doubles",
+      "team1": "龙鑫昊/林智鑫",
+      "team2": "黄玮/许力群",
+      "score": "2:6",
+      "winner": "team2",
+      "date": "2026-03-02"
+    },
     {
       "id": 13,
       "type": "doubles",
