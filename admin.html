@@ -429,6 +429,36 @@
                 </div>
 
                 <div class="form-group" style="margin-top: 20px;">
+                    <label style="color: var(--color-success);">☁️ 云端同步</label>
+                    <p style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: 12px;">
+                        通过 GitHub API 直接更新仓库中的 data.json 文件，自动提交推送。
+                    </p>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label style="font-size: 13px;">GitHub Token</label>
+                        <input type="password" id="github-token" placeholder="输入 GitHub Personal Access Token" style="width: 100%; padding: 10px; border: 1px solid var(--color-surface-alt); border-radius: var(--radius-sm);">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label style="font-size: 13px;">仓库 Owner</label>
+                        <input type="text" id="github-owner" placeholder="例如：Orange-Long320" value="Orange-Long320" style="width: 100%; padding: 10px; border: 1px solid var(--color-surface-alt); border-radius: var(--radius-sm);">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label style="font-size: 13px;">仓库名称</label>
+                        <input type="text" id="github-repo" placeholder="例如：badminton" value="badminton" style="width: 100%; padding: 10px; border: 1px solid var(--color-surface-alt); border-radius: var(--radius-sm);">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label style="font-size: 13px;">分支名称</label>
+                        <input type="text" id="github-branch" placeholder="例如：gh-pages" value="gh-pages" style="width: 100%; padding: 10px; border: 1px solid var(--color-surface-alt); border-radius: var(--radius-sm);">
+                    </div>
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px;">
+                        <button class="btn btn-primary" onclick="saveGithubConfig()">保存配置</button>
+                        <button class="btn btn-primary" onclick="syncToGithub()">🚀 同步到 GitHub</button>
+                    </div>
+                    <p style="font-size: 12px; color: var(--color-text-muted);">
+                        💡 获取 Token：访问 <a href="https://github.com/settings/tokens" target="_blank" style="color: var(--color-primary);">GitHub Token 设置页</a> → 创建新 Token（勾选 repo 权限）
+                    </p>
+                </div>
+
+                <div class="form-group" style="margin-top: 20px;">
                     <label style="color: var(--color-success);">📤 同步到 GitHub</label>
                     <p style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: 12px;">
                         生成 data.json 文件后，手动提交到 GitHub 仓库，其他人就能看到最新数据了。
@@ -862,6 +892,135 @@
                 alert('生成成功！\n\n下一步操作：\n1. 将 data.json 文件放到项目根目录\n2. 执行 git add data.json\n3. 执行 git commit -m "update: 同步比赛数据"\n4. 执行 git push origin gh-pages');
             }, 500);
         }
+
+        // ================================
+        // GitHub API 同步功能
+        // ================================
+
+        // 保存 GitHub 配置
+        function saveGithubConfig() {
+            const token = document.getElementById('github-token').value.trim();
+            const owner = document.getElementById('github-owner').value.trim();
+            const repo = document.getElementById('github-repo').value.trim();
+            const branch = document.getElementById('github-branch').value.trim();
+
+            if (!token || !owner || !repo || !branch) {
+                showToast('请填写完整的 GitHub 配置信息', 'error');
+                return;
+            }
+
+            localStorage.setItem('github_token', token);
+            localStorage.setItem('github_owner', owner);
+            localStorage.setItem('github_repo', repo);
+            localStorage.setItem('github_branch', branch);
+            showToast('配置已保存');
+        }
+
+        // 同步数据到 GitHub
+        async function syncToGithub() {
+            const token = localStorage.getItem('github_token');
+            const owner = localStorage.getItem('github_owner');
+            const repo = localStorage.getItem('github_repo');
+            const branch = localStorage.getItem('github_branch');
+
+            if (!token || !owner || !repo || !branch) {
+                showToast('请先配置 GitHub 信息', 'error');
+                return;
+            }
+
+            // 确保数据已保存
+            saveLocalData();
+
+            const data = {
+                players: players,
+                doublesTeams: doublesTeams,
+                matches: matchHistory,
+                nextPlayerId: window.nextPlayerId || 5
+            };
+
+            try {
+                showToast('正在获取最新文件...');
+
+                // 1. 获取当前文件的 SHA
+                const shaResponse = await fetch(
+                    `https://api.github.com/repos/${owner}/${repo}/contents/data.json?ref=${branch}`,
+                    {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    }
+                );
+
+                let sha = null;
+                if (shaResponse.ok) {
+                    const shaData = await shaResponse.json();
+                    sha = shaData.sha;
+                    console.log('当前文件 SHA:', sha);
+                } else if (shaResponse.status === 404) {
+                    console.log('文件不存在，将创建新文件');
+                } else {
+                    throw new Error(`获取 SHA 失败：${shaResponse.status}`);
+                }
+
+                showToast('正在上传数据...');
+
+                // 2. 更新/创建文件
+                const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+                const updateData = {
+                    message: 'update: 自动同步比赛数据 ' + new Date().toLocaleString('zh-CN'),
+                    content: content,
+                    branch: branch
+                };
+                if (sha) {
+                    updateData.sha = sha;
+                }
+
+                const updateResponse = await fetch(
+                    `https://api.github.com/repos/${owner}/${repo}/contents/data.json`,
+                    {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'Accept': 'application/vnd.github.v3+json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(updateData)
+                    }
+                );
+
+                if (!updateResponse.ok) {
+                    const errorData = await updateResponse.json();
+                    throw new Error(errorData.message || '更新失败');
+                }
+
+                const result = await updateResponse.json();
+                console.log('更新成功:', result);
+
+                showToast('✅ 同步成功！数据已推送到 GitHub');
+
+                // 显示访问链接
+                setTimeout(() => {
+                    alert(`同步成功！\n\n仓库：${owner}/${repo}\n分支：${branch}\n\nGitHub Pages 将在 1-2 分钟内自动更新`);
+                }, 500);
+            } catch (e) {
+                showToast('同步失败：' + e.message, 'error');
+                console.error('同步错误:', e);
+            }
+        }
+
+        // 页面加载时加载 GitHub 配置
+        window.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('github_token');
+            const owner = localStorage.getItem('github_owner');
+            const repo = localStorage.getItem('github_repo');
+            const branch = localStorage.getItem('github_branch');
+            if (token) document.getElementById('github-token').value = token;
+            if (owner) document.getElementById('github-owner').value = owner;
+            if (repo) document.getElementById('github-repo').value = repo;
+            if (branch) document.getElementById('github-branch').value = branch;
+        });
 
         function showToast(message, type = 'success') {
             const toast = document.createElement('div');

@@ -35,63 +35,83 @@ let selectedCalendarDate = null;
 // 加载数据
 async function loadLocalData() {
     try {
-        // 添加时间戳防止缓存
-        const response = await fetch('data.json?t=' + Date.now());
-        if (response.ok) {
-            const data = await response.json();
-            console.log('data.json 加载成功，原始数据:', data);
+        // 先从 localStorage 加载
+        const savedPlayers = localStorage.getItem('badminton_players');
+        const savedDoubles = localStorage.getItem('badminton_doubles');
+        const savedMatches = localStorage.getItem('badminton_matches');
+        const savedNextId = localStorage.getItem('badminton_nextPlayerId');
 
-            // 处理数据（支持字符串或数组格式）
-            if (data.players) {
-                players = typeof data.players === 'string'
-                    ? JSON.parse(data.players)
-                    : data.players;
-                console.log('选手数据加载:', players.length, '人');
-            }
-            if (data.doublesTeams || data.doubles) {
-                doublesTeams = typeof (data.doublesTeams || data.doubles) === 'string'
-                    ? JSON.parse(data.doublesTeams || data.doubles)
-                    : (data.doublesTeams || data.doubles);
-                console.log('双打数据加载:', doublesTeams.length, '组');
-            }
-            if (data.matches) {
-                matchHistory = typeof data.matches === 'string'
-                    ? JSON.parse(data.matches)
-                    : data.matches;
-                console.log('比赛数据加载:', matchHistory.length, '场');
-            }
-            if (data.nextPlayerId) {
-                window.nextPlayerId = typeof data.nextPlayerId === 'string'
-                    ? parseInt(data.nextPlayerId)
-                    : data.nextPlayerId;
-            }
+        if (savedPlayers) players = JSON.parse(savedPlayers);
+        if (savedDoubles) doublesTeams = JSON.parse(savedDoubles);
+        if (savedMatches) matchHistory = JSON.parse(savedMatches);
+        if (savedNextId) window.nextPlayerId = parseInt(savedNextId);
 
-            // 初始化缺失的 draws 字段（兼容性处理）
-            players.forEach(p => {
-                if (typeof p.draws === 'undefined') p.draws = 0;
-            });
-            doublesTeams.forEach(t => {
-                if (typeof t.draws === 'undefined') t.draws = 0;
-            });
+        console.log('从 localStorage 加载数据:', players.length, '名选手');
 
-            // 验证数据
-            if (players.length === 0) {
-                console.warn('选手数据为空，使用内置数据');
-                useDefaultData();
-            }
+        // 尝试从 GitHub 加载最新数据
+        await loadFromGithub();
 
-            console.log('数据加载完成:', players);
-            return;
-        } else {
-            console.warn('data.json 响应状态:', response.status);
-        }
+        // 初始化缺失的 draws 字段（兼容性处理）
+        players.forEach(p => {
+            if (typeof p.draws === 'undefined') p.draws = 0;
+        });
+        doublesTeams.forEach(t => {
+            if (typeof t.draws === 'undefined') t.draws = 0;
+        });
+
+        console.log('数据加载完成');
+        return;
     } catch (e) {
-        console.error('加载 data.json 出错:', e.message);
+        console.error('加载数据出错:', e);
     }
 
-    // 如果 fetch 失败，使用内置数据
+    // 如果失败，使用内置初始数据
     console.log('使用内置初始数据');
     useDefaultData();
+}
+
+// 从 GitHub 加载最新数据
+async function loadFromGithub() {
+    try {
+        // 获取 GitHub 配置
+        const owner = localStorage.getItem('github_owner') || 'Orange-Long320';
+        const repo = localStorage.getItem('github_repo') || 'badminton';
+        const branch = localStorage.getItem('github_branch') || 'gh-pages';
+
+        // 添加时间戳防止缓存
+        const timestamp = Date.now();
+        const response = await fetch(`https://raw.githubusercontent.com/${owner}/${repo}/${branch}/data.json?t=${timestamp}`);
+
+        if (!response.ok) {
+            console.log('GitHub 上暂无 data.json 文件');
+            return;
+        }
+
+        const data = await response.json();
+        console.log('从 GitHub 加载数据成功:', data);
+
+        // 更新本地数据
+        if (data.players) {
+            players = data.players;
+            localStorage.setItem('badminton_players', JSON.stringify(players));
+        }
+        if (data.doublesTeams || data.doubles) {
+            doublesTeams = data.doublesTeams || data.doubles;
+            localStorage.setItem('badminton_doubles', JSON.stringify(doublesTeams));
+        }
+        if (data.matches) {
+            matchHistory = data.matches;
+            localStorage.setItem('badminton_matches', JSON.stringify(matchHistory));
+        }
+        if (data.nextPlayerId) {
+            window.nextPlayerId = data.nextPlayerId;
+            localStorage.setItem('badminton_nextPlayerId', data.nextPlayerId.toString());
+        }
+
+        console.log('已从 GitHub 同步最新数据');
+    } catch (e) {
+        console.warn('从 GitHub 加载失败:', e.message);
+    }
 }
 
 // 使用内置默认数据
