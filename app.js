@@ -502,28 +502,6 @@ function selectAllMatches() {
     updateBatchModeUI();
     renderMatchHistory();
 }
-
-// 批量删除
-function batchDeleteMatches() {
-    if (selectedMatches.size === 0) {
-        alert('请先选择要删除的比赛记录');
-        return;
-    }
-
-    if (!confirm(`确定要删除选中的 ${selectedMatches.size} 条比赛记录吗？\n此操作不可撤销！`)) {
-        return;
-    }
-
-    // 先收集要删除的比赛，避免在循环中修改数组
-    const matchesToDelete = [];
-    selectedMatches.forEach(matchId => {
-        const match = matchHistory.find(m => m.id === matchId);
-        if (match) {
-            matchesToDelete.push(match);
-        }
-    });
-
-    // 逐个撤销战绩并删除
 // 批量删除比赛记录
 function batchDeleteMatches() {
     if (selectedMatches.size === 0) {
