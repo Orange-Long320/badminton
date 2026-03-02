@@ -1252,42 +1252,98 @@ function renderPlayerProfile() {
     document.getElementById('stat-doubles-record').textContent = `${stats.doublesWins}胜${stats.doublesLosses}负${doublesDrawText}`;
     document.getElementById('stat-best-streak').textContent = `${stats.bestStreak}场`;
 
-    // 渲染最佳搭档
-    const partnerContainer = document.getElementById('best-partner');
-    if (bestPartner) {
-        const partnerDrawText = bestPartner.draws > 0 ? `/${bestPartner.draws}平` : '';
-        partnerContainer.innerHTML = `
-            <div class="relation-partner">
-                <div class="partner-avatar">${bestPartner.avatar}</div>
-                <div class="partner-info">
-                    <div class="partner-name">${bestPartner.name}</div>
-                    <div class="partner-stats">${bestPartner.wins}胜${bestPartner.losses}负${partnerDrawText}</div>
-                </div>
-            </div>
-        `;
-    } else {
-        partnerContainer.innerHTML = '<div class="relation-empty">暂无数据</div>';
-    }
-
-    // 渲染一生之敌
-    const rivalContainer = document.getElementById('arch-rival');
-    if (archRival) {
-        const rivalDrawText = archRival.draws > 0 ? `/${archRival.draws}平` : '';
-        rivalContainer.innerHTML = `
-            <div class="relation-partner">
-                <div class="partner-avatar">${archRival.avatar}</div>
-                <div class="partner-info">
-                    <div class="partner-name">${archRival.name}</div>
-                    <div class="partner-stats">交手${archRival.totalGames}场 ${archRival.wins}胜${archRival.losses}负${rivalDrawText}</div>
-                </div>
-            </div>
-        `;
-    } else {
-        rivalContainer.innerHTML = '<div class="relation-empty">暂无数据</div>';
-    }
+    // 渲染对战统计（与其他三人的单打胜率）
+    renderVsStats(currentPlayer);
 
     // 渲染比赛记录
     renderMatchHistoryList(stats.matches);
+}
+
+// 渲染对战统计（与其他三人的单打胜率）
+function renderVsStats(currentPlayer) {
+    const container = document.getElementById('vs-stats');
+    if (!container) return;
+
+    // 计算当前选手与其他每个选手的单打对战记录
+    const vsRecords = [];
+
+    players.forEach(opponent => {
+        if (opponent.id === currentPlayer.id) return; // 跳过自己
+
+        let wins = 0, losses = 0, draws = 0;
+
+        matchHistory.forEach(match => {
+            if (match.type !== 'singles') return; // 只统计单打
+
+            const team1Name = match.team1;
+            const team2Name = match.team2;
+
+            // 检查当前选手和对手是否在这场比赛中
+            const currentPlayerInTeam1 = team1Name === currentPlayer.name;
+            const currentPlayerInTeam2 = team2Name === currentPlayer.name;
+            const opponentInTeam1 = team1Name === opponent.name;
+            const opponentInTeam2 = team2Name === opponent.name;
+
+            // 只有两人直接对抗才统计
+            if (currentPlayerInTeam1 && opponentInTeam2) {
+                if (match.winner === 'team1') wins++;
+                else if (match.winner === 'team2') losses++;
+                else if (match.winner === 'draw') draws++;
+            } else if (currentPlayerInTeam2 && opponentInTeam1) {
+                if (match.winner === 'team2') wins++;
+                else if (match.winner === 'team1') losses++;
+                else if (match.winner === 'draw') draws++;
+            }
+        });
+
+        const totalGames = wins + losses + draws;
+        const winRate = totalGames > 0 ? (((wins + draws * 0.5) / totalGames) * 100) : 0;
+
+        vsRecords.push({
+            opponent: opponent,
+            wins: wins,
+            losses: losses,
+            draws: draws,
+            totalGames: totalGames,
+            winRate: winRate
+        });
+    });
+
+    // 按胜率排序（从高到低）
+    vsRecords.sort((a, b) => b.winRate - a.winRate);
+
+    // 渲染 HTML
+    if (vsRecords.length === 0) {
+        container.innerHTML = '<div class="relation-empty">暂无对战记录</div>';
+        return;
+    }
+
+    container.innerHTML = vsRecords.map(record => {
+        const winRateClass = record.winRate >= 50 ? 'positive' : (record.winRate < 50 ? 'negative' : '');
+        const winRateDisplay = record.totalGames > 0 ? `${record.winRate.toFixed(1)}%` : '-';
+        const drawText = record.draws > 0 ? `/${record.draws}平` : '';
+
+        return `
+            <div class="vs-stat-box">
+                <div class="vs-stat-header">
+                    <div class="vs-avatar">${record.opponent.avatar}</div>
+                    <div class="vs-stat-info">
+                        <div class="vs-opponent-name">${record.opponent.name}</div>
+                        <div class="vs-stat-detail">${record.wins}胜${record.losses}负${drawText}</div>
+                    </div>
+                </div>
+                <div class="vs-stat-row">
+                    <span class="vs-stat-label">胜率</span>
+                    <span class="vs-stat-value ${winRateClass}">${winRateDisplay}</span>
+                </div>
+                ${record.totalGames > 0 ? `
+                <div class="vs-progress-bar">
+                    <div class="vs-progress-fill" style="width: ${record.winRate}%; background: ${record.winRate >= 50 ? 'var(--color-success)' : 'var(--color-danger)'}"></div>
+                </div>
+                ` : ''}
+            </div>
+        `;
+    }).join('');
 }
 
 // 渲染比赛记录列表

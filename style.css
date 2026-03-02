@@ -1500,6 +1500,90 @@ body {
     font-size: 0.85rem;
 }
 
+/* 对战统计样式 */
+.vs-stat-box {
+    background: var(--color-surface);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    box-shadow: var(--shadow-sm);
+}
+
+.vs-stat-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+}
+
+.vs-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-accent), var(--color-orange));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-dark);
+    font-weight: 700;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.vs-stat-info {
+    flex: 1;
+    text-align: left;
+}
+
+.vs-opponent-name {
+    font-weight: 600;
+    color: var(--color-text-primary);
+    font-size: 0.95rem;
+}
+
+.vs-stat-detail {
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+}
+
+.vs-stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--spacing-xs);
+}
+
+.vs-stat-label {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+}
+
+.vs-stat-value {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.vs-stat-value.positive {
+    color: var(--color-success);
+}
+
+.vs-stat-value.negative {
+    color: var(--color-danger);
+}
+
+.vs-progress-bar {
+    height: 6px;
+    background: var(--color-bg);
+    border-radius: 3px;
+    margin-top: var(--spacing-xs);
+    overflow: hidden;
+}
+
+.vs-progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width var(--transition-base);
+}
+
 /* 比赛记录 */
 .player-match-history {
     margin-bottom: var(--spacing-lg);
@@ -1621,6 +1705,8 @@ body {
         grid-column: span 2;
     }
 
+/* 对战统计 - 响应式 */
+@media (max-width: 768px) {
     .relations-grid {
         grid-template-columns: 1fr;
     }
