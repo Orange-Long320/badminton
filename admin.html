@@ -554,10 +554,17 @@
                     const netWins = team1Score - team2Score;
                     player1.points += netWins;
                     player2.points -= netWins;
-                    player1.wins += team1Score;
-                    player1.losses += team2Score;
-                    player2.wins += team2Score;
-                    player2.losses += team1Score;
+
+                    if (team1Score > team2Score) {
+                        player1.wins++;
+                        player2.losses++;
+                    } else if (team1Score < team2Score) {
+                        player1.losses++;
+                        player2.wins++;
+                    } else {
+                        player1.draws++;
+                        player2.draws++;
+                    }
                 }
             } else {
                 const team1Player2Id = document.getElementById('team1-player2').value;
@@ -579,7 +586,8 @@
                         players: [parseInt(team1Player1Id), parseInt(team1Player2Id)],
                         points: 0,
                         wins: 0,
-                        losses: 0
+                        losses: 0,
+                        draws: 0
                     };
                     doublesTeams.push(doublesTeam1);
                 }
@@ -590,7 +598,8 @@
                         players: [parseInt(team2Player1Id), parseInt(team2Player2Id)],
                         points: 0,
                         wins: 0,
-                        losses: 0
+                        losses: 0,
+                        draws: 0
                     };
                     doublesTeams.push(doublesTeam2);
                 }
@@ -598,10 +607,17 @@
                 const netWins = team1Score - team2Score;
                 doublesTeam1.points += netWins;
                 doublesTeam2.points -= netWins;
-                doublesTeam1.wins += team1Score;
-                doublesTeam1.losses += team2Score;
-                doublesTeam2.wins += team2Score;
-                doublesTeam2.losses += team1Score;
+
+                if (team1Score > team2Score) {
+                    doublesTeam1.wins++;
+                    doublesTeam2.losses++;
+                } else if (team1Score < team2Score) {
+                    doublesTeam1.losses++;
+                    doublesTeam2.wins++;
+                } else {
+                    doublesTeam1.draws++;
+                    doublesTeam2.draws++;
+                }
             }
 
             const newMatch = {
@@ -674,10 +690,17 @@
                     const netWins = team1Score - team2Score;
                     player1.points -= netWins;
                     player2.points += netWins;
-                    player1.wins -= team1Score;
-                    player1.losses -= team2Score;
-                    player2.wins -= team2Score;
-                    player2.losses -= team1Score;
+
+                    if (match.winner === 'team1') {
+                        player1.wins--;
+                        player2.losses--;
+                    } else if (match.winner === 'team2') {
+                        player1.losses--;
+                        player2.wins--;
+                    } else if (match.winner === 'draw') {
+                        player1.draws--;
+                        player2.draws--;
+                    }
                 }
             } else {
                 const team1Players = match.team1.split('/').sort();
@@ -696,10 +719,17 @@
                     const netWins = team1Score - team2Score;
                     doublesTeam1.points -= netWins;
                     doublesTeam2.points += netWins;
-                    doublesTeam1.wins -= team1Score;
-                    doublesTeam1.losses -= team2Score;
-                    doublesTeam2.wins -= team2Score;
-                    doublesTeam2.losses -= team1Score;
+
+                    if (match.winner === 'team1') {
+                        doublesTeam1.wins--;
+                        doublesTeam2.losses--;
+                    } else if (match.winner === 'team2') {
+                        doublesTeam1.losses--;
+                        doublesTeam2.wins--;
+                    } else if (match.winner === 'draw') {
+                        doublesTeam1.draws--;
+                        doublesTeam2.draws--;
+                    }
                 }
             }
 

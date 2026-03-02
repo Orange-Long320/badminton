@@ -1413,6 +1413,11 @@ body {
     color: var(--color-text-light);
 }
 
+.form-dot.draw {
+    background: var(--color-text-muted);
+    color: var(--color-text-light);
+}
+
 .form-empty {
     color: var(--color-text-muted);
     font-size: 0.9rem;
