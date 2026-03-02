@@ -104,21 +104,25 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    padding-top: var(--spacing-lg);
 }
 
 .logo {
-    font-size: 2rem;
-    font-weight: 800;
-    color: var(--color-dark);
-    letter-spacing: -0.5px;
+    font-size: 2.5rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--color-orange), var(--color-accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 2px;
 }
 
 .logo-text {
-    font-size: 0.65rem;
+    font-size: 0.7rem;
     font-weight: 600;
-    color: var(--color-text-muted);
-    margin-top: 4px;
-    letter-spacing: 1px;
+    color: var(--color-text-secondary);
+    margin-top: 6px;
+    letter-spacing: 3px;
     text-transform: uppercase;
 }
 
@@ -131,15 +135,7 @@ body {
     padding: 0;
     width: 100%;
     padding: 0 var(--spacing-sm);
-}
-
-.nav-bottom {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-sm);
-    padding: 0 var(--spacing-sm);
-    width: 100%;
+    margin-top: var(--spacing-lg);
 }
 
 .nav-item {
@@ -179,36 +175,6 @@ body {
 .nav-icon {
     width: 22px;
     height: 22px;
-}
-
-/* 用户头像 */
-.nav-user {
-    margin-top: var(--spacing-lg);
-    padding-top: var(--spacing-lg);
-    border-top: 1px solid var(--color-surface-alt);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--spacing-xs);
-}
-
-.user-avatar {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--color-accent), var(--color-orange));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--color-dark);
-    font-weight: 700;
-    font-size: 1rem;
-}
-
-.user-name {
-    font-size: 0.75rem;
-    color: var(--color-text-secondary);
-    font-weight: 500;
 }
 
 /* ================================
