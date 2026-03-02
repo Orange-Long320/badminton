@@ -1253,7 +1253,7 @@ function renderPlayerProfile() {
     document.getElementById('stat-best-streak').textContent = `${stats.bestStreak}场`;
 
     // 渲染对战统计（与其他三人的单打胜率）
-    renderVsStats(currentPlayer);
+    renderVsStats(player);
 
     // 渲染比赛记录
     renderMatchHistoryList(stats.matches);
