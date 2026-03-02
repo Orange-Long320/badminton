@@ -101,9 +101,9 @@
         1,
         4
       ],
-      "points": -4,
+      "points": -8,
       "wins": 0,
-      "losses": 1,
+      "losses": 2,
       "draws": 0
     },
     {
@@ -113,13 +113,22 @@
         2,
         3
       ],
-      "points": 4,
-      "wins": 1,
+      "points": 8,
+      "wins": 2,
       "losses": 0,
       "draws": 0
     }
   ],
   "matches": [
+    {
+      "id": 14,
+      "type": "doubles",
+      "team1": "林智鑫/龙鑫昊",
+      "team2": "许力群/黄玮",
+      "score": "2:6",
+      "winner": "team2",
+      "date": "2026-03-02"
+    },
     {
       "id": 13,
       "type": "doubles",
