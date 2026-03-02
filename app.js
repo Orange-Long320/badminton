@@ -1478,7 +1478,7 @@ function renderMatchdayMatches(matches) {
                     <div class="matchday-match-teams">
                         <span class="matchday-match-team ${isWin ? 'self' : ''}">${match.team1}</span>
                         <span class="matchday-match-vs">vs</span>
-                        <span class="matchday-match-team ${!isWin &amp;&amp; !isDraw ? 'self' : ''}">${match.team2}</span>
+                        <span class="matchday-match-team ${!isWin && !isDraw ? 'self' : ''}">${match.team2}</span>
                     </div>
                 </div>
                 <div class="matchday-match-right">
