@@ -39,22 +39,26 @@ async function loadLocalData() {
         const response = await fetch('data.json?t=' + Date.now());
         if (response.ok) {
             const data = await response.json();
+            console.log('data.json 加载成功，原始数据:', data);
 
             // 处理数据（支持字符串或数组格式）
             if (data.players) {
                 players = typeof data.players === 'string'
                     ? JSON.parse(data.players)
                     : data.players;
+                console.log('选手数据加载:', players.length, '人');
             }
             if (data.doublesTeams || data.doubles) {
                 doublesTeams = typeof (data.doublesTeams || data.doubles) === 'string'
                     ? JSON.parse(data.doublesTeams || data.doubles)
                     : (data.doublesTeams || data.doubles);
+                console.log('双打数据加载:', doublesTeams.length, '组');
             }
             if (data.matches) {
                 matchHistory = typeof data.matches === 'string'
                     ? JSON.parse(data.matches)
                     : data.matches;
+                console.log('比赛数据加载:', matchHistory.length, '场');
             }
             if (data.nextPlayerId) {
                 window.nextPlayerId = typeof data.nextPlayerId === 'string'
@@ -70,15 +74,51 @@ async function loadLocalData() {
                 if (typeof t.draws === 'undefined') t.draws = 0;
             });
 
-            console.log('数据加载成功:', players.length, '名选手', matchHistory.length, '场比赛');
+            // 验证数据
+            if (players.length === 0) {
+                console.warn('选手数据为空，使用内置数据');
+                useDefaultData();
+            }
+
+            console.log('数据加载完成:', players);
             return;
+        } else {
+            console.warn('data.json 响应状态:', response.status);
         }
     } catch (e) {
-        console.warn('无法加载 data.json（本地文件限制），使用内置初始数据');
+        console.error('加载 data.json 出错:', e.message);
     }
 
-    // 如果 fetch 失败（本地文件限制），使用内置的初始数据
+    // 如果 fetch 失败，使用内置数据
     console.log('使用内置初始数据');
+    useDefaultData();
+}
+
+// 使用内置默认数据
+function useDefaultData() {
+    players = [
+        { id: 1, name: '龙鑫昊', avatar: '龙', points: 9, wins: 1, losses: 1, draws: 2, signature: '羽球狂人', play_type: 'both' },
+        { id: 2, name: '黄玮', avatar: '黄', points: 10, wins: 2, losses: 1, draws: 1, signature: '扣杀之王', play_type: 'both' },
+        { id: 3, name: '许力群', avatar: '许', points: 7, wins: 1, losses: 1, draws: 2, signature: '防守大师', play_type: 'both' },
+        { id: 4, name: '林智鑫', avatar: '林', points: 4, wins: 1, losses: 2, draws: 1, signature: '网前小球', play_type: 'both' },
+    ];
+    doublesTeams = [
+        { id: 1, name: '龙鑫昊/黄玮', players: [1, 2], points: 0, wins: 0, losses: 0, draws: 0 },
+        { id: 2, name: '许力群/林智鑫', players: [3, 4], points: 0, wins: 0, losses: 0, draws: 0 },
+        { id: 3, name: '龙鑫昊/许力群', players: [1, 3], points: 6, wins: 0, losses: 0, draws: 1 },
+        { id: 4, name: '黄玮/林智鑫', players: [2, 4], points: 6, wins: 0, losses: 0, draws: 1 },
+    ];
+    matchHistory = [
+        { id: 7, type: 'doubles', team1: '龙鑫昊/许力群', team2: '黄玮/林智鑫', score: '6:6', winner: 'draw', date: '2026-03-01' },
+        { id: 7, type: 'singles', team1: '黄玮', team2: '林智鑫', score: '3:0', winner: 'team1', date: '2026-03-01' },
+        { id: 5, type: 'singles', team1: '林智鑫', team2: '许力群', score: '1:0', winner: 'team1', date: '2026-03-01' },
+        { id: 4, type: 'singles', team1: '黄玮', team2: '许力群', score: '0:1', winner: 'team2', date: '2026-03-01' },
+        { id: 3, type: 'singles', team1: '龙鑫昊', team2: '林智鑫', score: '2:0', winner: 'team1', date: '2026-03-01' },
+        { id: 2, type: 'singles', team1: '龙鑫昊', team2: '许力群', score: '1:1', winner: 'draw', date: '2026-03-01' },
+        { id: 1, type: 'singles', team1: '龙鑫昊', team2: '黄玮', score: '0:1', winner: 'team2', date: '2026-03-01' }
+    ];
+    window.nextPlayerId = 5;
+    console.log('已使用内置默认数据');
 }
 
 // 保存数据到本地（仅保存到 localStorage，供管理员导出）
