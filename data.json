@@ -8,7 +8,8 @@
       "wins": 4,
       "losses": 3,
       "signature": "1314羽毛球第一人",
-      "play_type": "both"
+      "play_type": "both",
+      "draws": 0
     },
     {
       "id": 2,
@@ -18,7 +19,8 @@
       "wins": 5,
       "losses": 3,
       "signature": "扣杀之王",
-      "play_type": "both"
+      "play_type": "both",
+      "draws": 0
     },
     {
       "id": 3,
@@ -28,7 +30,8 @@
       "wins": 2,
       "losses": 4,
       "signature": "防守大师",
-      "play_type": "both"
+      "play_type": "both",
+      "draws": 0
     },
     {
       "id": 4,
@@ -38,7 +41,8 @@
       "wins": 4,
       "losses": 5,
       "signature": "网前小球",
-      "play_type": "both"
+      "play_type": "both",
+      "draws": 0
     }
   ],
   "doublesTeams": [
@@ -49,9 +53,10 @@
         1,
         2
       ],
-      "points": -4,
+      "points": 0,
       "wins": 6,
-      "losses": 7
+      "losses": 6,
+      "draws": 0
     },
     {
       "id": 2,
@@ -60,9 +65,10 @@
         3,
         4
       ],
-      "points": 4,
-      "wins": 7,
-      "losses": 6
+      "points": 0,
+      "wins": 6,
+      "losses": 6,
+      "draws": 0
     },
     {
       "id": 3,
@@ -73,7 +79,8 @@
       ],
       "points": 0,
       "wins": 0,
-      "losses": 0
+      "losses": 0,
+      "draws": 0
     },
     {
       "id": 4,
@@ -84,7 +91,8 @@
       ],
       "points": 0,
       "wins": 0,
-      "losses": 0
+      "losses": 0,
+      "draws": 0
     },
     {
       "id": 5,
@@ -117,15 +125,6 @@
       "type": "doubles",
       "team1": "龙鑫昊/林智鑫",
       "team2": "黄玮/许力群",
-      "score": "2:6",
-      "winner": "team2",
-      "date": "2026-03-02"
-    },
-    {
-      "id": 13,
-      "type": "doubles",
-      "team1": "龙鑫昊/黄玮",
-      "team2": "林智鑫/许力群",
       "score": "2:6",
       "winner": "team2",
       "date": "2026-03-02"
