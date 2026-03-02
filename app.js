@@ -1254,7 +1254,6 @@ function renderPlayerProfile() {
     const archRival = findArchRival(player);
 
     // 渲染基础信息
-    const profileAvatar = document.getElementById('profile-avatar');
     profileAvatar.innerHTML = getAvatarHtml(player.avatar, 'large');
     document.getElementById('profile-name').textContent = player.name;
 
